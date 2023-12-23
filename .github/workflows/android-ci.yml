@@ -1,0 +1,44 @@
+name: Android CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+
+    - name: install linux tools
+      run: sudo apt install -y tree wget unzip python3
+
+    - name: download android ndk 20
+      run: wget https://dl.google.com/android/repository/android-ndk-r20b-linux-x86_64.zip
+
+    - name: unzip ndk
+      run: unzip android-ndk-r20b-linux-x86_64.zip
+
+    - name: setup ndk.dir for gradle
+      run: python3 setup_ndk_linux.py
+
+    - name: show directory structure
+      run: tree .
+
+    - name: Locate Gradle
+      run: which gradle
+
+    - name: Setup Gradle
+      run: gradle wrapper
+
+    - name: Build project
+      run: bash ./gradlew build
+
+    - uses: actions/upload-artifact@v2
+      with:
+        path: app/build/outputs/apk/debug/app-debug.apk

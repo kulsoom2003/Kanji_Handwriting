@@ -1,0 +1,15 @@
+gradle
+local.properties
+*.iml
+captures
+app/build
+*.png
+*.zip
+*.mp4
+.project
+.gradle
+.idea
+.settings
+.classpath
+google-java-format-1.8-all-deps.jar
+.ipynb_checkpoints
