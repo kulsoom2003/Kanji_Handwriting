@@ -15,9 +15,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class HandwritingCanvas extends View {
-    public static final int VIEW_BACKGROUND_COLOR = Color.argb(255, 22, 22, 22);
+    public static final int VIEW_BACKGROUND_COLOR = Color.argb(255, 22, 22, 22); //alpha is for background opacity
     public static final int STROKE_COLOR = Color.WHITE;
-    public static int WritingStrokeWidth = 5;
+    public static int WritingStrokeWidth = 5; // isn't the brush width
 
     public TouchCallback touchCallback;
 
@@ -38,11 +38,11 @@ public class HandwritingCanvas extends View {
      *
      * <p>https://dzone.com/articles/arraylist-vs-linkedlist-vs
      */
-    public List<CanvasPoint2D> currentStroke;
+    public List<CanvasPoint2D> currentStroke; //list of coordinates
 
-    public List<List<CanvasPoint2D>> writingStrokes;
+    public List<List<CanvasPoint2D>> writingStrokes; //list of strokes
 
-    public HandwritingCanvas(Context context, AttributeSet attrs) {
+    public HandwritingCanvas(Context context, AttributeSet attrs) { //constructor
         super(context, attrs);
         penDown = false;
 
@@ -53,7 +53,9 @@ public class HandwritingCanvas extends View {
         viewBackgroundPaint.setAntiAlias(false);
 
         writingStrokePaint = new Paint();
-        writingStrokePaint.setColor(STROKE_COLOR);
+        writingStrokePaint.setColor(
+
+                STROKE_COLOR);
         writingStrokePaint.setStyle(Paint.Style.STROKE);
         writingStrokePaint.setStrokeJoin(Paint.Join.ROUND);
         writingStrokePaint.setStrokeCap(Paint.Cap.ROUND);

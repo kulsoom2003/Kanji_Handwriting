@@ -18,7 +18,7 @@ public class SettingsActivity extends AppCompatActivity
         // TODO this activity will crash if we change permission from the Settings app
         // https://stackoverflow.com/a/56765912/8364403
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings);
+        setContentView(R.layout.settings); //settings
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DrawCharActivity">
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Draw a character!!" />
+
+    <io.github.ichisadashioko.android.kanji.views.HandwritingCanvas
+        android:id="@+id/drawCharCanvas"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <HorizontalScrollView
+        android:id="@+id/result_container_scroll_view_draw_char"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/result_size">
+
+        <LinearLayout
+            android:id="@+id/result_container_draw_char"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" />
+
+    </HorizontalScrollView>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="runClassifier"
+        android:text="evaluate input" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="clearCanvas"
+        android:text="clear!" />
+
+    <io.github.ichisadashioko.android.kanji.views.BitmapView
+        android:id="@+id/preview_bitmap_draw_char"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        />
+
+
+
+</LinearLayout>

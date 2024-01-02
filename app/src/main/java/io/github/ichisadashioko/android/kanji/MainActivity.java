@@ -1,4 +1,12 @@
 package io.github.ichisadashioko.android.kanji;
+/*
+* res/drawable has all the icons in it
+*
+*
+*
+*
+*
+* */
 
 import android.Manifest;
 import android.app.Activity;
@@ -152,7 +160,7 @@ public class MainActivity extends Activity
                 .registerOnSharedPreferenceChangeListener(this);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        int hintTextAlphaValue = -1;
+        int hintTextAlphaValue = -1; //the background character's opacity in evaluation
         try {
             hintTextAlphaValue =
                     Integer.parseInt(
@@ -513,6 +521,8 @@ public class MainActivity extends Activity
      * @param view the View that triggers this method.
      */
     public void copyTextToClipboard(View view) {
+        System.out.println("copying to clipboard");
+
         if (textRenderer.getText().length() > 0) {
             ClipboardManager clipboard =
                     (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -522,6 +532,12 @@ public class MainActivity extends Activity
             clipboard.setPrimaryClip(clipData);
         }
         saveWritingHistory(textRenderer.getText().toString());
+
+        System.out.println("copied to clipboard");
+        //setContentView(R.layout.settings); can't just do this
+        Intent intent = new Intent(this, MainOptionsActivity.class);
+        startActivity(intent);
+
     }
 
     /** Clear text showing in the UI. */
@@ -552,7 +568,7 @@ public class MainActivity extends Activity
      *
      * @param view the view that triggers this method
      */
-    public void openSettings(View view) {
+    public void openSettings(View view) { //called when the settings button is clicked
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
@@ -571,7 +587,7 @@ public class MainActivity extends Activity
         }
     }
 
-    public void saveWritingDataWithCustomLabel(View view) {
+    public void saveWritingDataWithCustomLabel(View view) { //unsure what this method does
         String customLabel = customLabelEditText.getText().toString();
         if (currentEvaluatingImage != null
                 && currentEvaluatingWritingStrokes != null
@@ -650,10 +666,11 @@ public class MainActivity extends Activity
                             sharedPreferences.getString(
                                     key, Integer.toString(ResultButton.DEFAULT_HINT_TEXT_ALPHA)));
 
+            System.out.println("hintTextAlphaValue: " + hintTextAlphaValue);
             if (hintTextAlphaValue < 0) {
-                ResultButton.HINT_TEXT_ALPHA = 0;
+                ResultButton.HINT_TEXT_ALPHA = 0; //0
             } else if (hintTextAlphaValue > 255) {
-                ResultButton.HINT_TEXT_ALPHA = 255;
+                ResultButton.HINT_TEXT_ALPHA = 255; //255
             } else {
                 ResultButton.HINT_TEXT_ALPHA = hintTextAlphaValue;
             }
@@ -677,4 +694,33 @@ public class MainActivity extends Activity
             }
         }
     }
+
+    public void goToLearnPage(View view) {
+        //
+        System.out.println("Go To Learn");
+        Intent intent = new Intent(this, ChooseCharActivity.class);
+        startActivity(intent);
+    }
+
+    public void goToTestPage(View view) {
+        //
+        System.out.println("Go To Test");
+    }
+
+    public void goToPlayPage(View view) {
+        //
+        System.out.println("Go To Play");
+    }
+
 }
+
+
+/*
+* to do:
+* create a new layout (page) and on clicking 'copy', open this layout
+* research the Activity Life Cycle
+*
+* done
+*
+*
+* */
