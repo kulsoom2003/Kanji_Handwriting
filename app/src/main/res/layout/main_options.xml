@@ -1,25 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:id="@+id/linearLayout"
     android:layout_width="match_parent"
+
     android:layout_height="match_parent"
+    android:background="@drawable/ui_image_two"
     tools:context=".MainOptionsActivity">
 
 
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Learn!!" />
+        android:id="@+id/button5"
+        android:layout_width="150dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="140dp"
+        android:layout_marginLeft="140dp"
+        android:layout_marginTop="300dp"
+        android:background="@drawable/ic_clear"
+        android:fontFamily="sans-serif-black"
+        android:onClick="goToLearn"
+        android:text="Learn"
+        android:textColor="#FFFFFF"
+        android:textSize="34sp"
+        android:textStyle="normal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:background="#F17171"
+        tools:ignore="TextSizeCheck" />
 
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Test!!" />
+        android:id="@+id/button6"
+        android:layout_width="150dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="50dp"
+        android:background="#00FFFFFF"
+        android:fontFamily="sans-serif-black"
+        android:onClick="goToTest"
+        android:text="Test"
+        android:textColor="#FFFFFF"
+        android:textSize="34sp"
+        app:layout_constraintEnd_toEndOf="@+id/button5"
+        app:layout_constraintStart_toStartOf="@+id/button5"
+        app:layout_constraintTop_toBottomOf="@+id/button5"
+        tools:background="#F07171" />
 
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Play!!" />
+        android:id="@+id/button7"
+        android:layout_width="150dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="50dp"
+        android:background="#00FFFFFF"
+        android:fontFamily="sans-serif-black"
+        android:text="Play"
+        android:textAllCaps="true"
+        android:textColor="#FFFFFF"
+        android:textSize="34sp"
+        app:layout_constraintEnd_toEndOf="@+id/button6"
+        app:layout_constraintStart_toStartOf="@+id/button6"
+        app:layout_constraintTop_toBottomOf="@+id/button6"
+        tools:background="#EF7171"
+        android:onClick="goToPlay"/>
 
-</LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+

@@ -1,6 +1,7 @@
 package io.github.ichisadashioko.android.kanji;
 
         import android.Manifest;
+        import android.content.Intent;
         import android.content.pm.PackageManager;
         import android.os.Bundle;
         import android.view.View;
@@ -20,5 +21,19 @@ public class MainOptionsActivity extends AppCompatActivity {
         setContentView(R.layout.main_options); //settings
 
     }
+
+    public void goToLearn(View view) {
+        System.out.println("Clicked Learn");
+    }
+
+    public void goToTest(View view) {
+        System.out.println("Clicked Test");
+    }
+
+    public void goToPlay(View view) {
+        System.out.println("Clicked Play");
+    }
+
+
 
 }

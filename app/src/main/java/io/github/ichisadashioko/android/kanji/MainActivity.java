@@ -263,7 +263,7 @@ public class MainActivity extends Activity
      * @param image the drawing image of `label`
      * @param writingStrokes list of strokes that create the writing
      */
-    public synchronized void exportWritingData(
+    public synchronized void exportWritingData( //creates a json file with each kanji drawn & other info about it
             String label,
             final float confidence,
             final long timestamp,
@@ -376,7 +376,7 @@ public class MainActivity extends Activity
         return file.mkdirs();
     }
 
-    public void pushText(String text) {
+    public void pushText(String text) { //sets content of first typing bar to text given
         isTextSaved = false;
         textRenderer.setText(textRenderer.getText() + text);
         textRenderer.setSelection(textRenderer.getText().length());
@@ -400,12 +400,16 @@ public class MainActivity extends Activity
         LinearLayout.LayoutParams layoutParams =
                 new LinearLayout.LayoutParams(
                         resultViewWidth, LinearLayout.LayoutParams.MATCH_PARENT);
+        //System.out.println("layout params toString: " + layoutParams.toString());
+        //System.out.println("confidence: " + btn.confidenceToString()); //printed for every kanji in result list because method is called in looping through results
         btn.setLayoutParams(layoutParams);
         btn.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        pushText(r.title);
+                        System.out.println("Result button clicked");
+
+                        pushText(r.title); //puts the kanji clicked in the first typing bar
                         if (canSaveWritingData()) {
                             // save image and writing strokes to files
                             exportWritingData(
@@ -450,12 +454,20 @@ public class MainActivity extends Activity
                             result, currentEvaluatingImage, currentEvaluatingWritingStrokes));
         }
 
+        System.out.println("Kanji is probably: " + results.get(0).title);
+        //here is where you should export/save the kanji to the file
+        pushText(results.get(0).title);
+        saveWritingHistory(results.get(0).title + " label: evaluated");
+
         // scroll the result list to the start
         resultListScrollView.scrollTo(0, 0);
     }
 
-    public void saveWritingHistory(final String text) {
+    public void saveWritingHistory(final String text) { //saves contents of first typing bar in a file. Updates the same file.
+        System.out.println("text to save: " + text);
+
         if (isTextSaved || text.isEmpty()) {
+            System.out.println("isTextSaved: " + isTextSaved);
             return;
         }
 
@@ -463,6 +475,8 @@ public class MainActivity extends Activity
             if (!canSaveWritingData()) {
                 return;
             }
+
+            System.out.println("Trying to save writing history");
 
             File downloadDirectory =
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -587,14 +601,16 @@ public class MainActivity extends Activity
         }
     }
 
-    public void saveWritingDataWithCustomLabel(View view) { //unsure what this method does
-        String customLabel = customLabelEditText.getText().toString();
+    public void saveWritingDataWithCustomLabel(View view) { // exports writing history but with the text in second typing bar when you click icon
+        String customLabel = customLabelEditText.getText().toString(); //text in the second typing bar
+        System.out.println("custom label edit text: " + customLabel);
+
         if (currentEvaluatingImage != null
                 && currentEvaluatingWritingStrokes != null
                 && !customLabel.isEmpty()) {
-            pushText(customLabel);
+            pushText(customLabel); //sets first typing bar to whatever is in the second
 
-            if (canSaveWritingData()) {
+            if (canSaveWritingData()) { // if the setting is enabled by the user
                 exportWritingData(
                         customLabel,
                         1f,
@@ -710,6 +726,15 @@ public class MainActivity extends Activity
     public void goToPlayPage(View view) {
         //
         System.out.println("Go To Play");
+        Intent intent = new Intent(this, PlayActivity.class);
+        startActivity(intent);
+    }
+
+    public void goToMainOptionsPage(View view) {
+        //
+        System.out.println("Go To Main Options");
+        Intent intent = new Intent(this, MainOptionsActivity.class);
+        startActivity(intent);
     }
 
 }

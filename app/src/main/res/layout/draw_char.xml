@@ -4,13 +4,16 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DrawCharActivity">
+    tools:context=".DrawCharActivity"
+    android:background="@drawable/ui_image_two"
+    >
+
 
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Draw a character!!" />
+        android:text="Draw the character for 'one'!!" />
 
     <io.github.ichisadashioko.android.kanji.views.HandwritingCanvas
         android:id="@+id/drawCharCanvas"
@@ -42,6 +45,13 @@
         android:layout_height="wrap_content"
         android:onClick="clearCanvas"
         android:text="clear!" />
+
+    <Button
+        android:id="@+id/countButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="clearCanvas" />
+
 
     <io.github.ichisadashioko.android.kanji.views.BitmapView
         android:id="@+id/preview_bitmap_draw_char"
