@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 28
+
+    useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId "io.github.ichisadashioko.android.kanji"
         minSdkVersion 16
@@ -15,12 +17,13 @@ android {
             minifyEnabled false
         }
     }
-    aaptOptions {
-        noCompress 'tflite'
-    }
     compileOptions {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
+    }
+    namespace 'io.github.ichisadashioko.android.kanji'
+    androidResources {
+        noCompress 'tflite'
     }
 }
 
@@ -36,5 +39,8 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
     implementation 'org.tensorflow:tensorflow-lite-support:0.0.0-nightly'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    implementation 'com.google.android.gms:play-services-cronet:18.0.1'
+
 
 }

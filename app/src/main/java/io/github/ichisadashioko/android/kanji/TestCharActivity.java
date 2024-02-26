@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
@@ -45,7 +44,7 @@ import io.github.ichisadashioko.android.kanji.views.TouchCallback;
 
 
 
-public class DrawCharActivity extends Activity
+public class TestCharActivity extends Activity
         implements TouchCallback {
     public static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE_CODE = 0;
     public static final String KANJI_FONT_PATH = "fonts/HGKyokashotai_Medium.ttf";
@@ -71,6 +70,7 @@ public class DrawCharActivity extends Activity
 
     public HashMap<String, String> dict;
     public Inventory inventory;
+    public String meaning;
     public String characterToDraw;
     public String LABEL_FILE_PATH = "etlcb_9b_labels.txt"; //temporary, used to filter out kanji that don't match api call
 
@@ -85,7 +85,10 @@ public class DrawCharActivity extends Activity
         Intent intent = getIntent();
         dict = (HashMap<String, String>) intent.getSerializableExtra("hashMap");
         inventory = getIntent().getParcelableExtra("inventory");
+        //inventory = (HashMap<String, Integer>) intent.getSerializableExtra("inventory");
+        meaning = intent.getStringExtra("meaningToDraw");
         characterToDraw = intent.getStringExtra("kanjiToDraw");
+
         System.out.println("extra data: ");
         System.out.println("-----------Hash Map from Draw Char: ");
         int countElements = 0;
@@ -94,12 +97,9 @@ public class DrawCharActivity extends Activity
             countElements++;
         }
         System.out.println("--------------------------");
-        System.out.println("to draw: " + characterToDraw);
+        System.out.println("to draw: " + meaning + " ( " + characterToDraw + ")");
         Button kanjiButton = findViewById(R.id.charToDraw);
-        Button learnButton = findViewById(R.id.learnButton);
-        kanjiButton.setText("Learn: Draw the character for: " + characterToDraw);
-        learnButton.setBackgroundColor(Color.parseColor("#831B1B"));
-
+        kanjiButton.setText("Draw the character for: " + meaning + " ( " + characterToDraw + ")");
 
         ArrayList<String> databaseChars;
 
@@ -137,6 +137,7 @@ public class DrawCharActivity extends Activity
         resultContainer = findViewById(R.id.result_container); // from xml
         resultViewWidth = (int) getResources().getDimension(R.dimen.result_size);
         resultListScrollView = findViewById(R.id.result_container_draw_char);
+
         bitmapView = findViewById(R.id.preview_bitmap_draw_char);
         canvas.touchCallback = this; //might be expecting a MainActivity here
 
@@ -173,6 +174,14 @@ public class DrawCharActivity extends Activity
 
     }
 
+    public void goToMainPage(View view) {
+        System.out.println("Go To Main");
+
+        Intent intent = new Intent();
+        intent.putExtra("inventory", inventory);
+        setResult(2, intent);
+        finish();//finishing activity
+    }
 
     @Override
     public void onTouchEnd() { //starts a new thread if autoEvaluate is turned on
@@ -221,11 +230,12 @@ public class DrawCharActivity extends Activity
         //if the character drawn was 一 then increase the counter
         //if(results.get(0).title.equals( dictExample.getFromKey("one"))) {
 
-        System.out.println(results.get(0));
-        System.out.println(characterToDraw);
 
-        if(results.get(0).title.equals(characterToDraw)) { //aa i don't know if all the kanji from API are in the database from wrapper app
+        if(results.get(0).title.equals(characterToDraw)) { // meaning
             count++; //increase count of number of evaluations so can count until 20 character draws
+            inventory.addDango();
+            inventory.printInventory();
+            ////////////////////////////////
             System.out.println("Correct!!!!");
             button = findViewById(R.id.countButton);
             button.setText(Integer.toString(count)); //reset count button to show increased number
@@ -386,18 +396,5 @@ public class DrawCharActivity extends Activity
         return labels;
     }
 
-    public void goToMainPage(View view) {
-        //
-        System.out.println("Go To Main");
-
-        Intent intent = new Intent();
-        intent.putExtra("inventory", inventory);
-        setResult(2, intent);
-        finish();//finishing activity
-
-    }
-
 }
 
-
-//have deleted the isTextSaved boolean because isn't necessary when there is no auto evaluation

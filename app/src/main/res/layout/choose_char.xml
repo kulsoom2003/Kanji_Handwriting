@@ -1,25 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:id="@+id/linearLayout4"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ChooseCharActivity"
     android:background="@drawable/ui_image_two"
-    >
+    tools:context=".GridViewTutorial">
 
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        tools:context=".CourseModel">
+
+        <!-- android:numColumns=2 is the number of columns for Grid View
+             android:horizontalSpacing is the space between horizontal grid items -->
+        <GridView
+            android:id="@+id/idGVcourses"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:horizontalSpacing="6dp"
+            android:numColumns="5"
+            android:verticalSpacing="6dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.085" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="380dp"
+        android:layout_height="60dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:gravity="center"
+        android:text="Choose a character"
+        android:textColor="#FFFFFF"
+        android:textSize="34sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:layout_width="match_parent"
+        android:id="@+id/mainButton"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
-        android:text="Choose a character!!" />
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="16dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:onClick="goToMainPage"
+        android:text="main"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:layout_width="match_parent"
+        android:id="@+id/learnButton"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
-        android:onClick="goToDrawCharPage"
-        android:text="Take me to Draw Character For 'one'" />
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:text="learn"
+        app:layout_constraintBottom_toBottomOf="@+id/mainButton"
+        app:layout_constraintStart_toEndOf="@+id/mainButton"
+        app:layout_constraintTop_toTopOf="@+id/mainButton"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/testButton"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:text="test"
+        app:layout_constraintBottom_toBottomOf="@+id/learnButton"
+        app:layout_constraintStart_toEndOf="@+id/learnButton"
+        app:layout_constraintTop_toTopOf="@+id/learnButton"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/playButton"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:text="play"
+        app:layout_constraintBottom_toBottomOf="@+id/testButton"
+        app:layout_constraintStart_toEndOf="@+id/testButton"
+        app:layout_constraintTop_toTopOf="@+id/testButton"
+        app:layout_constraintVertical_bias="0.0" />
 
 
+</androidx.constraintlayout.widget.ConstraintLayout>
 
-</LinearLayout>

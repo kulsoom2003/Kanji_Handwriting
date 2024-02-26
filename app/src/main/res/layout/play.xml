@@ -1,18 +1,185 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:id="@+id/linearLayout2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".PlayActivity"
     android:background="@drawable/ui_image_two"
-    >
+    tools:context=".PlayActivity">
 
+
+    <ImageView
+        android:id="@+id/imageButton"
+        android:layout_width="267dp"
+        android:layout_height="382dp"
+        android:layout_marginStart="44dp"
+        android:layout_marginLeft="44dp"
+        android:layout_marginTop="136dp"
+        android:contentDescription="Here is a cat"
+        android:src="@drawable/cat_sad"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/inventoryTextView"
+        android:layout_width="262dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="12dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:gravity="center"
+        android:text="Inventory, Happiness: "
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/imageButton"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/imageButton"
+        app:layout_constraintTop_toBottomOf="@+id/imageButton" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="303dp"
+        android:layout_height="61dp"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/imageButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.65"
+        app:srcCompat="@drawable/happiness_bar_image" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="97dp"
+        android:layout_height="85dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginRight="36dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView3"
+        app:layout_constraintEnd_toStartOf="@+id/imageView3"
+        app:layout_constraintTop_toTopOf="@+id/imageView3"
+        app:layout_constraintVertical_bias="0.375"
+        app:srcCompat="@drawable/dango_image" />
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="95dp"
+        android:layout_height="69dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="@+id/imageButton"
+        app:layout_constraintHorizontal_bias="0.662"
+        app:layout_constraintStart_toStartOf="@+id/imageButton"
+        app:layout_constraintTop_toBottomOf="@+id/imageButton"
+        app:srcCompat="@drawable/mochi_image" />
+
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="98dp"
+        android:layout_height="81dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView3"
+        app:layout_constraintStart_toEndOf="@+id/imageView3"
+        app:layout_constraintTop_toTopOf="@+id/imageView3"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/taiyaki_image" />
+
+    <TextView
+        android:id="@+id/dangoCount"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:text="Dango x0"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:gravity="center"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="@+id/imageView2"
+        app:layout_constraintStart_toStartOf="@+id/imageView2"
+        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+
+    <TextView
+        android:id="@+id/mochiCount"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:gravity="center"
+        android:text="Mochi x0"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="@+id/imageView3"
+        app:layout_constraintHorizontal_bias="0.486"
+        app:layout_constraintStart_toStartOf="@+id/imageView3"
+        app:layout_constraintTop_toBottomOf="@+id/imageView3" />
+
+    <TextView
+        android:id="@+id/taiyakiCount"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:text="Taiyaki x0"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:gravity="center"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="@+id/imageView4"
+        app:layout_constraintStart_toStartOf="@+id/imageView4"
+        app:layout_constraintTop_toBottomOf="@+id/imageView4" />
 
     <Button
-        android:layout_width="match_parent"
+        android:id="@+id/mainButton"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
-        android:text="cat" />
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="16dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:onClick="goToMainPage"
+        android:text="main"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
+    <Button
+        android:id="@+id/learnButton"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:text="learn"
+        app:layout_constraintBottom_toBottomOf="@+id/mainButton"
+        app:layout_constraintStart_toEndOf="@+id/mainButton"
+        app:layout_constraintTop_toTopOf="@+id/mainButton"
+        app:layout_constraintVertical_bias="0.0" />
 
-</LinearLayout>
+    <Button
+        android:id="@+id/testButton"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:text="test"
+        app:layout_constraintBottom_toBottomOf="@+id/learnButton"
+        app:layout_constraintStart_toEndOf="@+id/learnButton"
+        app:layout_constraintTop_toTopOf="@+id/learnButton"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/playButton"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:text="play"
+        app:layout_constraintBottom_toBottomOf="@+id/testButton"
+        app:layout_constraintStart_toEndOf="@+id/testButton"
+        app:layout_constraintTop_toTopOf="@+id/testButton"
+        app:layout_constraintVertical_bias="0.0" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

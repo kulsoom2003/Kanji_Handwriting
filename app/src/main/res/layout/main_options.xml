@@ -14,10 +14,10 @@
         android:id="@+id/button5"
         android:layout_width="150dp"
         android:layout_height="70dp"
-        android:layout_marginStart="140dp"
-        android:layout_marginLeft="140dp"
-        android:layout_marginTop="300dp"
-        android:background="@drawable/ic_clear"
+        android:layout_marginStart="112dp"
+        android:layout_marginLeft="112dp"
+        android:layout_marginTop="220dp"
+        android:background="#B34040"
         android:fontFamily="sans-serif-black"
         android:onClick="goToLearn"
         android:text="Learn"
@@ -26,7 +26,6 @@
         android:textStyle="normal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:background="#F17171"
         tools:ignore="TextSizeCheck" />
 
     <Button
@@ -34,7 +33,7 @@
         android:layout_width="150dp"
         android:layout_height="70dp"
         android:layout_marginTop="50dp"
-        android:background="#00FFFFFF"
+        android:background="#B34040"
         android:fontFamily="sans-serif-black"
         android:onClick="goToTest"
         android:text="Test"
@@ -42,25 +41,33 @@
         android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="@+id/button5"
         app:layout_constraintStart_toStartOf="@+id/button5"
-        app:layout_constraintTop_toBottomOf="@+id/button5"
-        tools:background="#F07171" />
+        app:layout_constraintTop_toBottomOf="@+id/button5" />
 
     <Button
         android:id="@+id/button7"
         android:layout_width="150dp"
         android:layout_height="70dp"
         android:layout_marginTop="50dp"
-        android:background="#00FFFFFF"
+        android:background="#B34040"
         android:fontFamily="sans-serif-black"
+        android:onClick="goToPlay"
         android:text="Play"
         android:textAllCaps="true"
         android:textColor="#FFFFFF"
         android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="@+id/button6"
         app:layout_constraintStart_toStartOf="@+id/button6"
-        app:layout_constraintTop_toBottomOf="@+id/button6"
-        tools:background="#EF7171"
-        android:onClick="goToPlay"/>
+        app:layout_constraintTop_toBottomOf="@+id/button6" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="original main activity"
+        android:onClick="goToOriginalMainActivity"
+        app:layout_constraintEnd_toEndOf="@+id/button7"
+        app:layout_constraintStart_toStartOf="@+id/button7"
+        app:layout_constraintTop_toBottomOf="@+id/button7" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -34,6 +34,11 @@ public class MainOptionsActivity extends AppCompatActivity {
         System.out.println("Clicked Play");
     }
 
+    public void goToOriginalMainActivity(View view) {
+        System.out.println("Clicked Play");
+    }
+
+
 
 
 }

@@ -1,25 +1,12 @@
 package io.github.ichisadashioko.android.kanji;
-
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
-
+import android.widget.Button;
+import android.widget.GridView;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
-
-import org.chromium.net.CronetEngine;
-//tried to import HttpRequest
-
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-
-
-//////////////////////
-import android.os.AsyncTask;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,63 +18,72 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import java.util.Dictionary;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 
-
-import io.github.ichisadashioko.android.kanji.views.APICalls;
 import io.github.ichisadashioko.android.kanji.views.Inventory;
-import io.github.ichisadashioko.android.kanji.views.ResultButton;
 
-////////////////////////////
-
-
-
-public class ChooseCharActivity extends AppCompatActivity {
-    public static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE_CODE = 0;
-
-    public String dataFromAPI = "";
+public class GridViewTutorial extends AppCompatActivity { //activity
     public HashMap<String, String> dict;
     public Inventory inventory;
+    GridView kanjiGV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // TODO this activity will crash if we change permission from the Settings app
-        // https://stackoverflow.com/a/56765912/8364403
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.choose_char); //settings
+        setContentView(R.layout.choose_char);
 
-
-
-        //
-        dict = new HashMap<String, String>();
+        Intent intent = getIntent();
+        dict = (HashMap<String, String>) intent.getSerializableExtra("hashMap");
         inventory = getIntent().getParcelableExtra("inventory");
+        System.out.println("inventory in GV Tutorial: ");
+        inventory.printInventory();
+        processDict();
 
-        dict.put("one", "一");
-        dict.put("two", "二");
-        dict.put("five", "五"); //doesn't add these values. it's okay though
+        System.out.println("extra data: ");
+        System.out.println("-----------Hash Map given from MainAct to GridTutorial: ");
+        int countElements = 0;
+        for (String key: dict.keySet()) {
+            //System.out.println(countElements + ") " + key + " : " + dict.get(key)); //countElements only used for printing
+            countElements++;
+        }
+        System.out.println("--------------------------");
 
+        /*
+        coursesGV = findViewById(R.id.idGVcourses);
 
+        //change this to show each kanji (all of them)
+        dict = new HashMap<String, String>();
         new APICallsFromClass().execute();
 
-        System.out.println("Made a call!"); //executes at the same time as async task
+         */
+
     }
 
-
-
+    public void goToLearnPage(View view) {
+        //
+        System.out.println("Go To Learn");
+        Intent intent = new Intent(this, ChooseCharActivity.class);
+        startActivity(intent);
+    }
 
     public void goToDrawCharPage(View view) {
-        System.out.println("Go To Draw Char");
-        Intent intent = new Intent(this, DrawCharActivity.class);
+        //
+        System.out.println("Go To Draw Char x20");
+        Button b = (Button)view;
+        String buttonText = b.getText().toString();
+        System.out.println("button text: " + buttonText);
+
+        Intent intent = new Intent(this, DrawCharActivity.class); //pass dict to DrawCharActivity?
+        //intent.putExtra("message_key", "im going to ACE this project!!!");
         intent.putExtra("hashMap", dict);
-        intent.putExtra("kanjiToDraw", "(character)");
+        intent.putExtra("kanjiToDraw", buttonText); //put the element that was clicked here
         startActivity(intent);
     }
 
     public void goToMainPage(View view) {
-        System.out.println("Go To Main");
+        System.out.println("GV Tutorial: Go To Main");
+        inventory.printInventory();
 
         Intent intent = new Intent();
         intent.putExtra("inventory", inventory);
@@ -96,12 +92,38 @@ public class ChooseCharActivity extends AppCompatActivity {
     }
 
 
-    void processValue(String resultsFromAPICall) {
-        System.out.println("Data from API: ");
-        System.out.println(resultsFromAPICall);
+
+
+
+    /////////////// API CALL
+
+
+    void processDict() { // adds keys from dict to arrayList and sets adapter for the Grid View class
+        //add keys to an array list
+
+        ArrayList<CourseModel> kanjiArrayList = new ArrayList<CourseModel>();
+        //print each kanji key
+
+        //System.out.println("-----------Hash Map KEYS: ");
+        int count = 0;
+        for (String key: dict.keySet()) {
+            //System.out.println(count + ") " + key);
+            //add them to array list
+            kanjiArrayList.add(new CourseModel(key, R.drawable.ic_search));
+
+            count++;
+        }
+        //System.out.println("--------------------------"); //shouldn't print anything because dict exists in another thread. it does.. interesting
+
+        kanjiGV = findViewById(R.id.idGVcourses);
+        CourseGVAdapter adapter = new CourseGVAdapter(this, kanjiArrayList);
+        kanjiGV.setAdapter(adapter);
+
     }
     // can process this data, taking a JSON Array to split the kanji into categories later
 
+
+    /*
     private class APICallsFromClass extends AsyncTask<Void,Void,Void> {
         String data = "";
         String dataParsed = "";
@@ -113,16 +135,11 @@ public class ChooseCharActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                //System.out.println("connecting to API");
-
-                //URL url = new URL("https://kanjialive-api.p.rapidapi.com/api/public/search/advanced/");
-
                 URL url = new URL("https://kanjialive-api.p.rapidapi.com/api/public/kanji/all");
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 
                 httpURLConnection.setRequestProperty("X-RapidAPI-Host", "kanjialive-api.p.rapidapi.com");
                 httpURLConnection.setRequestProperty("X-RapidAPI-Key", "2e7c7a14ebmsh3ea82089fdad054p1bf7b7jsn660987efe1ee");
-
 
                 responseCode = httpURLConnection.getResponseCode();
 
@@ -134,20 +151,8 @@ public class ChooseCharActivity extends AppCompatActivity {
                     data = data + line;
                 }
 
-                //System.out.println(data);
-
-
                 JA = new JSONArray(data);
-                for (int i = 0; i < JA.length(); i++) {
-                    JSONObject JO = (JSONObject) JA.get(i);
-                    singleParsed = i + ") kanji:" + JO.get("kanji") + "\n";
-                    //dataParsed = dataParsed + singleParsed;
-                }
-
                 for(int i = 0; i < JA.length(); i++) {
-                    singleMeaning = i + ") " + JA.getJSONObject(i).optString("ka_utf") + " :  ";
-                    singleMeaning = singleMeaning + JA.getJSONObject(i).optString("meaning") + "\n";
-                    dataParsed = dataParsed + singleMeaning;
                     dict.put(JA.getJSONObject(i).optString("ka_utf"), JA.getJSONObject(i).optString("meaning"));
                 }
 
@@ -163,8 +168,8 @@ public class ChooseCharActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            dataFromAPI = dataParsed;
 
+            /*
             System.out.println("-----------Hash Map: ");
             int count = 0;
             for (String key: dict.keySet()) {
@@ -172,16 +177,17 @@ public class ChooseCharActivity extends AppCompatActivity {
                 count++;
             }
             System.out.println("--------------------------");
+            */
 
+    /*
             System.out.println("response code: " + responseCode);
             System.out.println("length: " + JA.length());
 
-            //processValue(dataParsed);
-
-            System.out.println("executed from within Choose Character!!!");
+            processHashmap(dict);
             super.onPostExecute(aVoid);
         }
 
     }
 
+     */
 }

@@ -1,65 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:id="@+id/linearLayout3"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DrawCharActivity"
     android:background="@drawable/ui_image_two"
-    >
-
+    android:orientation="vertical"
+    tools:context=".DrawCharActivity">
 
 
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Draw the character for 'one'!!" />
+        android:id="@+id/charToDraw"
+        android:layout_width="360dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="40dp"
+        android:background="#B34040"
+        android:text="@string/app_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.49"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <io.github.ichisadashioko.android.kanji.views.HandwritingCanvas
         android:id="@+id/drawCharCanvas"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1" />
+        android:layout_width="360dp"
+        android:layout_height="342dp"
+        android:layout_marginTop="40dp"
+        app:layout_constraintEnd_toEndOf="@+id/charToDraw"
+        app:layout_constraintStart_toStartOf="@+id/charToDraw"
+        app:layout_constraintTop_toBottomOf="@+id/charToDraw" />
+
 
     <HorizontalScrollView
-        android:id="@+id/result_container_scroll_view_draw_char"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/result_size">
+        android:id="@+id/result_container_draw_char"
+        android:layout_width="71dp"
+        android:layout_height="52dp"
+        android:layout_marginBottom="12dp"
+        android:contentDescription="Here is a result container horizontal scroll view"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/charToDraw"
+        app:layout_constraintEnd_toEndOf="@+id/charToDraw"
+        app:layout_constraintHorizontal_bias="0.415"
+        app:layout_constraintStart_toStartOf="@+id/charToDraw">
 
         <LinearLayout
-            android:id="@+id/result_container_draw_char"
+            android:id="@+id/result_container"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal" />
 
     </HorizontalScrollView>
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="runClassifier"
-        android:text="evaluate input" />
+    <io.github.ichisadashioko.android.kanji.views.BitmapView
+        android:id="@+id/preview_bitmap_draw_char"
+        android:layout_width="57dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginLeft="48dp"
+        android:layout_weight="1"
+        app:layout_constraintBottom_toBottomOf="@+id/result_container_draw_char"
+        app:layout_constraintStart_toEndOf="@+id/result_container_draw_char"
+        app:layout_constraintTop_toTopOf="@+id/result_container_draw_char"
+        app:layout_constraintVertical_bias="1.0" />
 
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/button2"
+        android:layout_width="360dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="24dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:onClick="runClassifier"
+        android:text="evaluate input"
+        app:layout_constraintEnd_toEndOf="@+id/drawCharCanvas"
+        app:layout_constraintStart_toStartOf="@+id/drawCharCanvas"
+        app:layout_constraintTop_toBottomOf="@+id/drawCharCanvas" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="360dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="12dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
         android:onClick="clearCanvas"
-        android:text="clear!" />
+        android:text="clear!"
+        app:layout_constraintEnd_toEndOf="@+id/button2"
+        app:layout_constraintHorizontal_bias="0.481"
+        app:layout_constraintStart_toStartOf="@+id/button2"
+        app:layout_constraintTop_toBottomOf="@+id/button2" />
 
     <Button
         android:id="@+id/countButton"
-        android:layout_width="match_parent"
+        android:layout_width="360dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="16dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:onClick="clearCanvas"
+        android:text="count: "
+        app:layout_constraintEnd_toEndOf="@+id/button3"
+        app:layout_constraintHorizontal_bias="0.214"
+        app:layout_constraintStart_toStartOf="@+id/button3"
+        app:layout_constraintTop_toBottomOf="@+id/button3" />
+
+    <Button
+        android:id="@+id/mainButton"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="clearCanvas" />
+        android:layout_marginBottom="16dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:onClick="goToMainPage"
+        android:text="back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/learnButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:text="learn"
+        app:layout_constraintBottom_toBottomOf="@+id/mainButton"
+        app:layout_constraintStart_toEndOf="@+id/mainButton"
+        app:layout_constraintTop_toTopOf="@+id/mainButton"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/testButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:text="test"
+        app:layout_constraintBottom_toBottomOf="@+id/learnButton"
+        app:layout_constraintStart_toEndOf="@+id/learnButton"
+        app:layout_constraintTop_toTopOf="@+id/learnButton"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/playButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
+        android:background="#B34040"
+        android:fontFamily="sans-serif-black"
+        android:text="play"
+        app:layout_constraintBottom_toBottomOf="@+id/testButton"
+        app:layout_constraintStart_toEndOf="@+id/testButton"
+        app:layout_constraintTop_toTopOf="@+id/testButton"
+        app:layout_constraintVertical_bias="0.0" />
 
 
-    <io.github.ichisadashioko.android.kanji.views.BitmapView
-        android:id="@+id/preview_bitmap_draw_char"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        />
-
-
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

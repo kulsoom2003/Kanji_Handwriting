@@ -19,6 +19,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
@@ -28,28 +29,42 @@ import android.util.JsonWriter;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import io.github.ichisadashioko.android.kanji.tflite.KanjiClassifier;
 import io.github.ichisadashioko.android.kanji.tflite.Recognition;
 import io.github.ichisadashioko.android.kanji.views.BitmapView;
 import io.github.ichisadashioko.android.kanji.views.CanvasPoint2D;
 import io.github.ichisadashioko.android.kanji.views.HandwritingCanvas;
+import io.github.ichisadashioko.android.kanji.views.Inventory;
 import io.github.ichisadashioko.android.kanji.views.ResultButton;
 import io.github.ichisadashioko.android.kanji.views.TouchCallback;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends Activity
         implements TouchCallback, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -71,7 +86,6 @@ public class MainActivity extends Activity
 
     // ~/Download/handwriting_data/writing_history/
     public static final String WRITING_LOG_DIR_NAME = "writing_history";
-
     /**
      * 5 KBs for text file.
      *
@@ -122,6 +136,14 @@ public class MainActivity extends Activity
     public boolean isTextSaved = true;
 
     public BitmapView bitmapView;
+    public HashMap<String, String> dict; //dictionary
+    public GridView kanjiGV;
+
+    //make inventory
+    public Inventory inventory; //errors because passing an object to another activity
+    //public HashMap<String, Integer> inventory;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -135,6 +157,29 @@ public class MainActivity extends Activity
         customLabelEditText = findViewById(R.id.custom_label);
         resultListScrollView = findViewById(R.id.result_container_scroll_view);
         bitmapView = findViewById(R.id.preview_bitmap);
+
+        dict = new HashMap<String, String>();
+        inventory = new Inventory();
+        inventory.printInventory();
+
+        /*
+        inventory = new HashMap<String, Integer>();
+        inventory.put("Dango", 0);
+        inventory.put("Daifuku", 0);
+        inventory.put("Mochi", 0);
+        System.out.println("Inventory: ");
+        for (String key : inventory.keySet()) {
+            System.out.println(key + ", " + inventory.get(key));
+        }
+        */
+
+        try {
+            new APICallsFromClass().execute().get(); //fill the dictionary
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         // I add a TouchCallback interface because if we override the event listener,
         // the canvas is not working correctly. Our custom canvas manually handle touch
@@ -457,13 +502,13 @@ public class MainActivity extends Activity
         System.out.println("Kanji is probably: " + results.get(0).title);
         //here is where you should export/save the kanji to the file
         pushText(results.get(0).title);
-        saveWritingHistory(results.get(0).title + " label: evaluated");
+        saveWritingHistory(results.get(0).title + " label: evaluated <- MainAct", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME);
 
         // scroll the result list to the start
         resultListScrollView.scrollTo(0, 0);
     }
 
-    public void saveWritingHistory(final String text) { //saves contents of first typing bar in a file. Updates the same file.
+    public void saveWritingHistory(final String text, String saveDirectoryName, String writingLogDirName) { //saves contents of first typing bar in a file. Updates the same file.
         System.out.println("text to save: " + text);
 
         if (isTextSaved || text.isEmpty()) {
@@ -480,13 +525,13 @@ public class MainActivity extends Activity
 
             File downloadDirectory =
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            String rootSavePath = downloadDirectory.getAbsolutePath() + "/" + SAVE_DIRECTORY_NAME;
+            String rootSavePath = downloadDirectory.getAbsolutePath() + "/" + saveDirectoryName;
             rootSavePath = rootSavePath.replaceAll("/+", "/");
             if (!prepareDirectory(rootSavePath)) {
                 throw new Exception(String.format("Cannot create directory: %s", rootSavePath));
             }
 
-            String writingHistoryDirectoryPath = rootSavePath + "/" + WRITING_LOG_DIR_NAME;
+            String writingHistoryDirectoryPath = rootSavePath + "/" + writingLogDirName;
             if (!prepareDirectory(writingHistoryDirectoryPath)) {
                 throw new Exception(
                         String.format("Cannot create directory: %s", writingHistoryDirectoryPath));
@@ -545,7 +590,7 @@ public class MainActivity extends Activity
                             "text copied from handwriting input", textRenderer.getText());
             clipboard.setPrimaryClip(clipData);
         }
-        saveWritingHistory(textRenderer.getText().toString());
+        saveWritingHistory(textRenderer.getText().toString(), SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME);
 
         System.out.println("copied to clipboard");
         //setContentView(R.layout.settings); can't just do this
@@ -556,7 +601,7 @@ public class MainActivity extends Activity
 
     /** Clear text showing in the UI. */
     public void clearText(View view) {
-        saveWritingHistory(textRenderer.getText().toString());
+        saveWritingHistory(textRenderer.getText().toString(), SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME);
         textRenderer.setText("");
     }
 
@@ -643,7 +688,7 @@ public class MainActivity extends Activity
     public void lookUpMeaningWithJishoDotOrg(View view) {
         String japaneseText = this.textRenderer.getText().toString();
         if (!japaneseText.isEmpty()) {
-            saveWritingHistory(japaneseText);
+            saveWritingHistory(japaneseText, SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME);
 
             int selectionStart = this.textRenderer.getSelectionStart();
             int selectionEnd = this.textRenderer.getSelectionEnd();
@@ -711,6 +756,95 @@ public class MainActivity extends Activity
         }
     }
 
+    ArrayList<CourseModel> processHashmap(HashMap<String, String> resultsHM) {
+        //add keys to an array list
+
+        ArrayList<CourseModel> kanjiArrayList = new ArrayList<CourseModel>();
+        //print each kanji key
+
+        //System.out.println("-----------Hash Map KEYS: ");
+        int count = 0;
+        for (String key: resultsHM.keySet()) {
+            //System.out.println(count + ") " + key);
+            //add them to array list
+            kanjiArrayList.add(new CourseModel(key, R.drawable.ic_search));
+
+            count++;
+        }
+        //System.out.println("--------------------------"); //shouldn't print anything because dict exists in another thread. it does.. interesting
+
+        //create and set adapter wherever you go to the grid view page, not here
+        //CourseGVAdapter adapter = new CourseGVAdapter(this, kanjiArrayList);
+        //coursesGV.setAdapter(adapter);
+        return kanjiArrayList;
+
+
+    }
+    // can process this data, taking a JSON Array to split the kanji into categories later
+
+    private class APICallsFromClass extends AsyncTask<Void,Void,Void> {
+        String data = "";
+        int responseCode;
+        JSONArray JA;
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                URL url = new URL("https://kanjialive-api.p.rapidapi.com/api/public/kanji/all");
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+
+                httpURLConnection.setRequestProperty("X-RapidAPI-Host", "kanjialive-api.p.rapidapi.com");
+                httpURLConnection.setRequestProperty("X-RapidAPI-Key", "2e7c7a14ebmsh3ea82089fdad054p1bf7b7jsn660987efe1ee");
+
+                responseCode = httpURLConnection.getResponseCode();
+
+                InputStream inputStream = httpURLConnection.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                String line = "";
+                while (line != null) {
+                    line = bufferedReader.readLine();
+                    data = data + line;
+                }
+
+                JA = new JSONArray(data);
+                for(int i = 0; i < JA.length(); i++) {
+                    dict.put(JA.getJSONObject(i).optString("ka_utf"), JA.getJSONObject(i).optString("meaning"));
+                }
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+
+            /*
+            System.out.println("-----------Hash Map: ");
+            int count = 0;
+            for (String key: dict.keySet()) {
+                System.out.println(count + ") " + key + " : " + dict.get(key));
+                count++;
+            }
+            System.out.println("--------------------------");
+            */
+
+
+            System.out.println("response code: " + responseCode);
+            System.out.println("length: " + JA.length());
+
+            ArrayList<CourseModel> kanjiChars = processHashmap(dict);
+
+            super.onPostExecute(aVoid);
+        }
+
+    }
+
     public void goToLearnPage(View view) {
         //
         System.out.println("Go To Learn");
@@ -721,12 +855,52 @@ public class MainActivity extends Activity
     public void goToTestPage(View view) {
         //
         System.out.println("Go To Test");
+
+        Intent intent = new Intent(this, TestCharActivity.class);
+        intent.putExtra("hashMap", dict);
+        intent.putExtra("meaningToDraw", "heaven");
+        //find kanji associated
+        String kanjiChar = "";
+        for (String key : dict.keySet()) {
+            if(dict.get(key).equals("heaven")) {
+                kanjiChar = key;
+            }
+        }
+
+        intent.putExtra("kanjiToDraw", kanjiChar);
+        intent.putExtra("inventory", inventory);
+
+        startActivityForResult(intent, 2); //activity is started with request code 2
+
+        //startActivity(intent);
+        System.out.println("inventory from main after test activity");
+        inventory.printInventory(); //still empty...
+
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        // check if the request code is same as what is passed  here it is 2
+        if(requestCode==2)
+        {
+            inventory = data.getParcelableExtra("inventory");
+            System.out.println("inventory from main");
+            inventory.printInventory();
+
+        }
     }
 
     public void goToPlayPage(View view) {
         //
         System.out.println("Go To Play");
         Intent intent = new Intent(this, PlayActivity.class);
+        intent.putExtra("inventory", inventory);
+
+        System.out.println("Inventory Main -> Play");
+        inventory.printInventory(); //this is an empty inventory.... will try writing to and reading from a file instead
         startActivity(intent);
     }
 
@@ -737,8 +911,25 @@ public class MainActivity extends Activity
         startActivity(intent);
     }
 
-}
+    public void goToGridView(View view) {
+        //
+        System.out.println("Go To Grid View");
+        //System.out.println("-----------Hash Map in goToGridView: ");
+        //int count = 0;
+        //for (String key: dict.keySet()) {
+        //    System.out.println(count + ") " + key + " : " + dict.get(key));
+        //    count++;
+        //}
+        //System.out.println("--------------------------");
+        processHashmap(dict);
 
+        Intent intent = new Intent(this, GridViewTutorial.class);
+        intent.putExtra("hashMap", dict);
+        intent.putExtra("inventory", inventory);
+        startActivity(intent);
+    }
+
+}
 
 /*
 * to do:
