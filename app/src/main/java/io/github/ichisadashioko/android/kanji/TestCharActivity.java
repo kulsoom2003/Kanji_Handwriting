@@ -7,8 +7,10 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -18,8 +20,14 @@ import android.widget.LinearLayout;
 import android.widget.Button;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 
@@ -31,7 +39,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Scanner;
 
 import io.github.ichisadashioko.android.kanji.tflite.KanjiClassifier;
 import io.github.ichisadashioko.android.kanji.tflite.Recognition;
@@ -72,6 +84,10 @@ public class TestCharActivity extends Activity
     public Inventory inventory;
     public String meaning;
     public String characterToDraw;
+    public HashMap<String, String> charsLearnt;
+    public HashMap<String, Integer> charsToTest; // character, reps
+    public Iterator<HashMap.Entry<String, Integer>> iterator;
+    public HashMap.Entry<String, Integer> charsToTestEntry;
     public String LABEL_FILE_PATH = "etlcb_9b_labels.txt"; //temporary, used to filter out kanji that don't match api call
 
 
@@ -86,8 +102,86 @@ public class TestCharActivity extends Activity
         dict = (HashMap<String, String>) intent.getSerializableExtra("hashMap");
         inventory = getIntent().getParcelableExtra("inventory");
         //inventory = (HashMap<String, Integer>) intent.getSerializableExtra("inventory");
-        meaning = intent.getStringExtra("meaningToDraw");
+        //meaning = intent.getStringExtra("meaningToDraw");
+
         characterToDraw = intent.getStringExtra("kanjiToDraw");
+        //randomise characterToDraw
+
+        charsLearnt = new HashMap<String, String>();
+        charsToTest = new HashMap<String, Integer>();
+
+        System.out.println("Reading file");
+        //String charLearntKey;
+        //String charLearntNoTestedAndDate;
+        try {
+            System.out.println("locating file for LearntChars");
+            File myObj = new File("/storage/emulated/0/Download/handwriting_data/learnt_characters/000000.txt");
+            System.out.println("located file for LearntChars");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                System.out.println(data);
+                // add to charsLearnt HashMap
+                String charLearntKey = data.substring(0,1);
+                String charLearntNoTestedAndDate = data.substring(2); //start from 2nd index (after char and space)
+                //System.out.println(charLearntKey + ", " + charLearntNoTestedAndDate);
+                //charsLearnt.put(charLearntKey, charLearntNoTestedAndDate);
+                charsLearnt.put(charLearntKey, charLearntNoTestedAndDate);
+
+            }
+            myReader.close();
+            System.out.println("Done reading file");
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+
+        //print charsLearnt hash map
+        System.out.println("CharsLearnt HashMap: ");
+        for (String key : charsLearnt.keySet()) {
+            System.out.println(key + ", " + charsLearnt.get(key));
+        }
+
+        int noOfTimesTested;
+        int daysUntilNextTest;
+        LocalDate dueDate = null;
+        LocalDate dateTemp = null; //to initialise them
+        int reps;
+        //above for SR algorithm
+
+        System.out.println("Chars Learnt Information");
+        for (String key : charsLearnt.keySet()) {
+            //System.out.println(key + ", " + charsLearnt.get(key));
+            noOfTimesTested = Integer.parseInt(charsLearnt.get(key).split(" ")[0]);
+            daysUntilNextTest = noOfTimesTested;
+            reps = 20 - noOfTimesTested;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                dateTemp = LocalDate.parse(charsLearnt.get(key).split(" ")[1]);
+                dueDate = dateTemp.plusDays(daysUntilNextTest);
+
+                //print info
+                System.out.println(key + ") " + dueDate + ", reps: " + reps);
+
+                if(dueDate.isBefore(LocalDate.now()) || dueDate.equals(LocalDate.now())) { //shouldn't equal, but for testing purposes will keep this for now
+                    charsToTest.put(key, reps);
+                } else {
+                    System.out.println(key + " not due yet");
+                }
+            }
+        }
+
+        System.out.println("Chars to Test: ");
+        if(charsToTest.isEmpty()) {
+            System.out.println("no chars to test"); //pick random from learnt
+        }
+        for (String key : charsToTest.keySet()) {
+            System.out.println(key + ", " + charsToTest.get(key));
+        }
+
+        iterator = charsToTest.entrySet().iterator();
+        charsToTestEntry = iterator.next();
+
 
         System.out.println("extra data: ");
         System.out.println("-----------Hash Map from Draw Char: ");
@@ -97,9 +191,19 @@ public class TestCharActivity extends Activity
             countElements++;
         }
         System.out.println("--------------------------");
+
+
+        //randomise char to draw
+
+        // find first key in charToTest
+
+
+        characterToDraw = charsToTestEntry.getKey();
+        meaning = dict.get(characterToDraw);
+
         System.out.println("to draw: " + meaning + " ( " + characterToDraw + ")");
         Button kanjiButton = findViewById(R.id.charToDraw);
-        kanjiButton.setText("Draw the character for: " + meaning + " ( " + characterToDraw + ")");
+        kanjiButton.setText("Draw the character for: " + meaning + " (" + characterToDraw + ") " + charsToTestEntry.getValue() + " times");
 
         ArrayList<String> databaseChars;
 
@@ -172,6 +276,60 @@ public class TestCharActivity extends Activity
         dictExample.loadDict();
         System.out.println("dictionary return: " + dictExample.getFromKey("two"));
 
+        //updateFileTestedChar("夕");
+
+
+    }
+
+    public void updateFileTestedChar(String charTested) {
+        //updating file
+        try {
+            System.out.println("opening file to update");
+            // input the file content to the String "input"
+            BufferedReader file = new BufferedReader(new FileReader("/storage/emulated/0/Download/handwriting_data/learnt_characters/000000.txt"));
+            String line;
+            String input = "";
+
+            while ((line = file.readLine()) != null) {
+                input += line + '\n';
+            }
+
+            System.out.println("input: " + input); // check that it's inputted right
+
+            //input = input.replace("夕 17 2024-02-10", "夕 18 2024-02-10");
+            String[] lines = input.split("\n");
+            String lineToReplace = "";
+            for(String element : lines) {
+                if(Character.compare(element.charAt(0), charTested.charAt(0)) == 0) {
+                    lineToReplace = element;
+                }
+            }
+            //String lineToReplace = input.substring(input.indexOf(charTested), input.indexOf('\n'));
+            //System.out.println("line to replace: " + lineToReplace);
+            String replaceWith = "";
+
+            int oldTimesTested = Integer.parseInt(lineToReplace.split(" ")[1]);
+            LocalDate oldDate = null;
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                oldDate = LocalDate.parse(lineToReplace.split(" ")[2]);
+                replaceWith = charTested + " " + (oldTimesTested + 1) + " " + LocalDate.now();
+            }
+
+            System.out.println("line to replace: " + lineToReplace);
+            System.out.println("replace with: " + replaceWith);
+
+
+            input = input.replace(lineToReplace, replaceWith);
+            System.out.println("new input: " + input);
+
+            // write the new String with the replaced line OVER the same file
+            FileOutputStream File = new FileOutputStream("/storage/emulated/0/Download/handwriting_data/learnt_characters/000000.txt");
+            File.write(input.getBytes());
+
+        } catch (Exception e) {
+            System.out.println("Problem reading file.");
+        }
     }
 
     public void goToMainPage(View view) {
@@ -239,12 +397,40 @@ public class TestCharActivity extends Activity
             System.out.println("Correct!!!!");
             button = findViewById(R.id.countButton);
             button.setText(Integer.toString(count)); //reset count button to show increased number
+
+            Button kanjiButton = findViewById(R.id.charToDraw);
+            kanjiButton.setText("Draw the character for: " + meaning + " (" + characterToDraw + ") " + (charsToTestEntry.getValue() - count) + " times");
         }
 
-        if(count == 21) {
-            count = 0;
-            button = findViewById(R.id.countButton);
-            button.setText(Integer.toString(count)); //reset count button to show increased number
+        if(count == charsToTestEntry.getValue()) { //done reps
+
+            //update file here with new due date & reps.
+            updateFileTestedChar(characterToDraw);
+            //display correct
+            button.setText("Well done! Will add to inventory");
+            //display that treats were added to the inventory
+
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    Intent intent = new Intent();
+                    intent.putExtra("inventory", inventory);
+                    setResult(2, intent);
+                    finish();//finishing activity
+                }
+            }, 3000);
+
+            /*
+            Intent intent = new Intent();
+            intent.putExtra("inventory", inventory);
+            setResult(2, intent);
+            finish();//finishing activity
+
+             */
+
+            //count = 0;
+            //button = findViewById(R.id.countButton);
+            //button.setText(Integer.toString(count)); //reset count button to show increased number
         } //can replace this with a mod function. also make a 'resetCount' function
 
 

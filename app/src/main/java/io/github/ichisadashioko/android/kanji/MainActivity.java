@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
@@ -60,11 +61,16 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import java.io.FileNotFoundException;  // Import this class to handle errors
+import java.util.Scanner;
 
 public class MainActivity extends Activity
         implements TouchCallback, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -86,6 +92,7 @@ public class MainActivity extends Activity
 
     // ~/Download/handwriting_data/writing_history/
     public static final String WRITING_LOG_DIR_NAME = "writing_history";
+    public static final String WRITING_LOG_DIR_NAME_NEW_FILE = "learnt_characters"; //has chars, date last learnt, no. of times tested (test in priority for SRS)
     /**
      * 5 KBs for text file.
      *
@@ -141,12 +148,15 @@ public class MainActivity extends Activity
 
     //make inventory
     public Inventory inventory; //errors because passing an object to another activity
+    public String charDrawn;
     //public HashMap<String, Integer> inventory;
+    public HashMap<String, String>  charsLearnt; // format: character, no.tested date
 
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        System.out.println("Creating Main Activity");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -161,17 +171,6 @@ public class MainActivity extends Activity
         dict = new HashMap<String, String>();
         inventory = new Inventory();
         inventory.printInventory();
-
-        /*
-        inventory = new HashMap<String, Integer>();
-        inventory.put("Dango", 0);
-        inventory.put("Daifuku", 0);
-        inventory.put("Mochi", 0);
-        System.out.println("Inventory: ");
-        for (String key : inventory.keySet()) {
-            System.out.println(key + ", " + inventory.get(key));
-        }
-        */
 
         try {
             new APICallsFromClass().execute().get(); //fill the dictionary
@@ -242,6 +241,18 @@ public class MainActivity extends Activity
         } else {
             HandwritingCanvas.WritingStrokeWidth = writingStrokeWidth;
         }
+
+        /*
+        saveWritingHistory("夕 17 2024-02-10", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
+        saveWritingHistory("士 15 2024-02-27", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
+        saveWritingHistory("天 8 2024-03-22", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
+        saveWritingHistory("入 16 2024-01-01", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
+        System.out.println("saved in new file");
+
+         */
+
+
+
     }
 
     /**
@@ -511,44 +522,54 @@ public class MainActivity extends Activity
     public void saveWritingHistory(final String text, String saveDirectoryName, String writingLogDirName) { //saves contents of first typing bar in a file. Updates the same file.
         System.out.println("text to save: " + text);
 
-        if (isTextSaved || text.isEmpty()) {
+        //if (isTextSaved || text.isEmpty()) {
+        if (text.isEmpty()) {
             System.out.println("isTextSaved: " + isTextSaved);
             return;
         }
 
         try {
-            if (!canSaveWritingData()) {
+            if (!canSaveWritingData()) { //checks permission from settings in the app
                 return;
             }
 
             System.out.println("Trying to save writing history");
 
             File downloadDirectory =
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            String rootSavePath = downloadDirectory.getAbsolutePath() + "/" + saveDirectoryName;
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS); //Environment imported library, directory_downloads property of environment
+            String rootSavePath = downloadDirectory.getAbsolutePath() + "/" + saveDirectoryName; //parameter
             rootSavePath = rootSavePath.replaceAll("/+", "/");
-            if (!prepareDirectory(rootSavePath)) {
+            if (!prepareDirectory(rootSavePath)) { //creates directory for rootSavePath
                 throw new Exception(String.format("Cannot create directory: %s", rootSavePath));
             }
 
-            String writingHistoryDirectoryPath = rootSavePath + "/" + writingLogDirName;
+            String writingHistoryDirectoryPath = rootSavePath + "/" + writingLogDirName; // file path to save file in
             if (!prepareDirectory(writingHistoryDirectoryPath)) {
                 throw new Exception(
                         String.format("Cannot create directory: %s", writingHistoryDirectoryPath));
             }
+            //above creates directory to save file in
+            System.out.println("Created directory: " + writingHistoryDirectoryPath);
 
             int indexCounter = 0;
             String saveFilePath;
             File saveFile;
 
             do {
-                saveFilePath =
-                        writingHistoryDirectoryPath + "/" + String.format("%06d.txt", indexCounter);
-                saveFilePath = saveFilePath.replace("/+", "/");
+
+                if(saveDirectoryName.equals("learnt_characters")) {
+                    saveFilePath = writingHistoryDirectoryPath + "/learnt_characters_file.txt";
+                } else {
+                    saveFilePath = writingHistoryDirectoryPath + "/" + String.format("%06d.txt", indexCounter);
+                }
+
+                        saveFilePath = saveFilePath.replace("/+", "/");
                 saveFile = new File(saveFilePath);
+                System.out.println("saveFilePath: " + saveFilePath);
 
                 if (!saveFile.exists()) {
                     saveFile.createNewFile();
+                    System.out.println("Creating new file");
                 } else {
                     if (saveFile.isDirectory()) {
                         // backup this directory to take over the file name
@@ -558,14 +579,16 @@ public class MainActivity extends Activity
                         saveFile.createNewFile();
                     }
                 }
-
-                indexCounter++;
+                System.out.println("Incrementing index counter");
+                indexCounter++; //isn't updated systematically but doesn't really matter
             } while (saveFile.length() > MAX_LOG_SIZE);
 
             OutputStreamWriter osw =
-                    new OutputStreamWriter(new FileOutputStream(saveFile, true), "utf8");
+                    new OutputStreamWriter(new FileOutputStream(saveFile, true), "utf8"); //writes to file
+            System.out.println("written to file");
             osw.append(text);
             osw.append('\n');
+            //new FileOutputStream(saveFile).close();
             osw.flush();
             osw.close();
             isTextSaved = true;
@@ -886,9 +909,17 @@ public class MainActivity extends Activity
         // check if the request code is same as what is passed  here it is 2
         if(requestCode==2)
         {
-            inventory = data.getParcelableExtra("inventory");
+            this.inventory = data.getParcelableExtra("inventory");
+            this.charDrawn = data.getStringExtra("charDrawn");
             System.out.println("inventory from main");
             inventory.printInventory();
+            System.out.println("Char drawn (from main): " + charDrawn);
+            //Date date = new Date();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && charDrawn != null) { //null when coming from testActivity
+                saveWritingHistory(charDrawn + " 0 " + LocalDate.now(), SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
+            }
+
 
         }
     }
@@ -926,7 +957,7 @@ public class MainActivity extends Activity
         Intent intent = new Intent(this, GridViewTutorial.class);
         intent.putExtra("hashMap", dict);
         intent.putExtra("inventory", inventory);
-        startActivity(intent);
+        startActivityForResult(intent, 2);
     }
 
 }

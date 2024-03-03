@@ -25,6 +25,15 @@
             android:textAlignment="center"
             android:onClick="goToDrawCharPage"/>
 
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/meaning"
+            android:text="---"
+            android:textSize="10dp"
+            android:textAlignment="center"
+            android:onClick="showMeaning"/>
+
         <!--
         <ImageView
             android:id="@+id/idIVcourse"

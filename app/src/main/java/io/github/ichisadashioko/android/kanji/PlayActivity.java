@@ -7,6 +7,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,8 +19,10 @@ import io.github.ichisadashioko.android.kanji.views.Inventory;
 
 public class PlayActivity extends AppCompatActivity {
     public static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE_CODE = 0;
-    public TextView inventoryText;
+    public TextView dangoCount, mochiCount, taiyakiCount;
     public Inventory inventory;
+    public ImageView catSprite;
+    public ProgressBar happiness;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,14 +33,35 @@ public class PlayActivity extends AppCompatActivity {
         setContentView(R.layout.play); //settings
 
         inventory = getIntent().getParcelableExtra("inventory");
+        catSprite = findViewById(R.id.catSprite);
+        System.out.println("inventory from Play");
+        inventory.printInventory();
 
-        inventoryText = findViewById(R.id.inventoryTextView);
+        dangoCount = findViewById(R.id.dangoCount);
+        mochiCount = findViewById(R.id.mochiCount);
+        taiyakiCount = findViewById(R.id.taiyakiCount);
+        happiness = findViewById(R.id.progressBar);
+        happiness.setProgress(inventory.getDango());
+
         Button playButton = findViewById(R.id.playButton);
-        inventoryText.setText(inventory.inventoryToString()); //reset count button to show increased number
+
+        System.out.println("found views by IDs");
+
+        dangoCount.setText("Dango x" + Integer.toString(inventory.getDango()));
+        mochiCount.setText("Mochi x" + Integer.toString(inventory.getMochi()));
+        taiyakiCount.setText("Taiyaki x" + Integer.toString(inventory.getTaiyaki()));
+        //inventoryText.setText(inventory.inventoryToString()); //reset count button to show increased number
+        System.out.println("set all counts");
+
         playButton.setBackgroundColor(Color.parseColor("#831B1B"));
 
-        System.out.println("In Play");
-        inventory.printInventory();
+        if(inventory.getDango() > 5 && inventory.getDango() <= 10) {
+            catSprite.setImageResource(R.drawable.cat_happy);
+        } else if(inventory.getDango() > 10 && inventory.getDango() <= 15) {
+            catSprite.setImageResource(R.drawable.cat_v_happy);
+        } else if(inventory.getDango() > 15) {
+            catSprite.setImageResource(R.drawable.cat_vv_happy);
+        }
 
     }
 

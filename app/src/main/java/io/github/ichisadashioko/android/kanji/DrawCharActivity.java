@@ -72,6 +72,7 @@ public class DrawCharActivity extends Activity
     public HashMap<String, String> dict;
     public Inventory inventory;
     public String characterToDraw;
+    public String charToSave = "";
     public String LABEL_FILE_PATH = "etlcb_9b_labels.txt"; //temporary, used to filter out kanji that don't match api call
 
 
@@ -97,7 +98,9 @@ public class DrawCharActivity extends Activity
         System.out.println("to draw: " + characterToDraw);
         Button kanjiButton = findViewById(R.id.charToDraw);
         Button learnButton = findViewById(R.id.learnButton);
-        kanjiButton.setText("Learn: Draw the character for: " + characterToDraw);
+
+
+        kanjiButton.setText("Learn: Draw the character for: " + dict.get(characterToDraw) + " " + characterToDraw);
         learnButton.setBackgroundColor(Color.parseColor("#831B1B"));
 
 
@@ -227,12 +230,15 @@ public class DrawCharActivity extends Activity
         if(results.get(0).title.equals(characterToDraw)) { //aa i don't know if all the kanji from API are in the database from wrapper app
             count++; //increase count of number of evaluations so can count until 20 character draws
             System.out.println("Correct!!!!");
+            inventory.addDango();
+            inventory.printInventory();
             button = findViewById(R.id.countButton);
             button.setText(Integer.toString(count)); //reset count button to show increased number
         }
 
-        if(count == 21) {
+        if(count == 6) { //temporarily, for demo
             count = 0;
+            charToSave = characterToDraw; //character is learnt, will be saved in file
             button = findViewById(R.id.countButton);
             button.setText(Integer.toString(count)); //reset count button to show increased number
         } //can replace this with a mod function. also make a 'resetCount' function
@@ -392,6 +398,11 @@ public class DrawCharActivity extends Activity
 
         Intent intent = new Intent();
         intent.putExtra("inventory", inventory);
+        intent.putExtra("charDrawn", charToSave);
+        System.out.println("charDrawn (from DrawChar): " + charToSave);
+        System.out.println("inventory from draw char, being passed to GV");
+        inventory.printInventory();
+
         setResult(2, intent);
         finish();//finishing activity
 

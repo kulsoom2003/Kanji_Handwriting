@@ -28,6 +28,8 @@ public class GridViewTutorial extends AppCompatActivity { //activity
     public Inventory inventory;
     GridView kanjiGV;
 
+    public String characterToDraw;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,8 +80,44 @@ public class GridViewTutorial extends AppCompatActivity { //activity
         //intent.putExtra("message_key", "im going to ACE this project!!!");
         intent.putExtra("hashMap", dict);
         intent.putExtra("kanjiToDraw", buttonText); //put the element that was clicked here
-        startActivity(intent);
+        intent.putExtra("inventory", inventory);
+        startActivityForResult(intent, 2);
     }
+
+    public void showMeaning(View view) {
+
+        Button kanjiButton = (Button) findViewById(R.id.idButtonCourse);
+        String buttonText = kanjiButton.getText().toString();
+
+        Button meaningButton = (Button)view;
+        meaningButton.setText(dict.get(buttonText));
+
+        System.out.println("show:" + buttonText + ", " + dict.get(buttonText));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        // check if the request code is same as what is passed  here it is 2
+        if(requestCode==2)
+        {
+            inventory = data.getParcelableExtra("inventory");
+            characterToDraw = data.getStringExtra("charDrawn");
+
+            System.out.println("inventory from grid view----");
+            inventory.printInventory();
+
+            Intent intent = new Intent();
+            intent.putExtra("inventory", inventory);
+            intent.putExtra("charDrawn", characterToDraw);
+            System.out.println("character drawn (from GV): " + characterToDraw);
+            setResult(2, intent);
+            finish();
+
+        }
+    }
+
 
     public void goToMainPage(View view) {
         System.out.println("GV Tutorial: Go To Main");

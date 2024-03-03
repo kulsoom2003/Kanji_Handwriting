@@ -72,7 +72,7 @@
         android:background="#B34040"
         android:fontFamily="sans-serif-black"
         android:onClick="runClassifier"
-        android:text="evaluate input"
+        android:text="check"
         app:layout_constraintEnd_toEndOf="@+id/drawCharCanvas"
         app:layout_constraintStart_toStartOf="@+id/drawCharCanvas"
         app:layout_constraintTop_toBottomOf="@+id/drawCharCanvas" />
@@ -85,7 +85,7 @@
         android:background="#B34040"
         android:fontFamily="sans-serif-black"
         android:onClick="clearCanvas"
-        android:text="clear!"
+        android:text="clear"
         app:layout_constraintEnd_toEndOf="@+id/button2"
         app:layout_constraintHorizontal_bias="0.481"
         app:layout_constraintStart_toStartOf="@+id/button2"
@@ -105,59 +105,19 @@
         app:layout_constraintStart_toStartOf="@+id/button3"
         app:layout_constraintTop_toBottomOf="@+id/button3" />
 
+
     <Button
         android:id="@+id/mainButton"
-        android:layout_width="wrap_content"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
         android:layout_marginBottom="16dp"
         android:background="#B34040"
         android:fontFamily="sans-serif-black"
         android:onClick="goToMainPage"
-        android:text="back"
+        android:text="main"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/learnButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginLeft="20dp"
-        android:background="#B34040"
-        android:fontFamily="sans-serif-black"
-        android:text="learn"
-        app:layout_constraintBottom_toBottomOf="@+id/mainButton"
-        app:layout_constraintStart_toEndOf="@+id/mainButton"
-        app:layout_constraintTop_toTopOf="@+id/mainButton"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <Button
-        android:id="@+id/testButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginLeft="20dp"
-        android:background="#B34040"
-        android:fontFamily="sans-serif-black"
-        android:text="test"
-        app:layout_constraintBottom_toBottomOf="@+id/learnButton"
-        app:layout_constraintStart_toEndOf="@+id/learnButton"
-        app:layout_constraintTop_toTopOf="@+id/learnButton"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <Button
-        android:id="@+id/playButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginLeft="20dp"
-        android:background="#B34040"
-        android:fontFamily="sans-serif-black"
-        android:text="play"
-        app:layout_constraintBottom_toBottomOf="@+id/testButton"
-        app:layout_constraintStart_toEndOf="@+id/testButton"
-        app:layout_constraintTop_toTopOf="@+id/testButton"
-        app:layout_constraintVertical_bias="0.0" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
