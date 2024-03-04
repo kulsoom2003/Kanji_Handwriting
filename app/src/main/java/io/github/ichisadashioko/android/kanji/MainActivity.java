@@ -144,6 +144,7 @@ public class MainActivity extends Activity
 
     public BitmapView bitmapView;
     public HashMap<String, String> dict; //dictionary
+    public HashMap<String, Integer> grades; //maps kanji to grade
     public GridView kanjiGV;
 
     //make inventory
@@ -169,11 +170,14 @@ public class MainActivity extends Activity
         bitmapView = findViewById(R.id.preview_bitmap);
 
         dict = new HashMap<String, String>();
+        grades = new HashMap<String, Integer>();
         inventory = new Inventory();
         inventory.printInventory();
 
         try {
             new APICallsFromClass().execute().get(); //fill the dictionary
+            System.out.println("dict size: " + dict.size());
+            System.out.println("grades size: " + grades.size());
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
@@ -242,14 +246,16 @@ public class MainActivity extends Activity
             HandwritingCanvas.WritingStrokeWidth = writingStrokeWidth;
         }
 
-        /*
+/*
         saveWritingHistory("夕 17 2024-02-10", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
         saveWritingHistory("士 15 2024-02-27", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
         saveWritingHistory("天 8 2024-03-22", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
         saveWritingHistory("入 16 2024-01-01", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
         System.out.println("saved in new file");
 
-         */
+ */
+
+
 
 
 
@@ -790,7 +796,7 @@ public class MainActivity extends Activity
         for (String key: resultsHM.keySet()) {
             //System.out.println(count + ") " + key);
             //add them to array list
-            kanjiArrayList.add(new CourseModel(key, R.drawable.ic_search));
+            kanjiArrayList.add(new CourseModel(key, R.drawable.ic_search, grades.get(key)));
 
             count++;
         }
@@ -829,33 +835,62 @@ public class MainActivity extends Activity
                     data = data + line;
                 }
 
+                /*
                 JA = new JSONArray(data);
                 for(int i = 0; i < JA.length(); i++) {
                     dict.put(JA.getJSONObject(i).optString("ka_utf"), JA.getJSONObject(i).optString("meaning"));
+                    //grades.put(JA.getJSONObject(i).optString("ka_utf"), JA.getJSONObject(i).getInt("grade"));
                 }
+
+                 */
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            } //catch (JSONException e) {
+            //    e.printStackTrace();
+            //}
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
 
-            /*
-            System.out.println("-----------Hash Map: ");
+            String meaning = "";
+            String gradeString = "";
+
+            try {
+                JA = new JSONArray(data);
+                for(int i = 0; i < JA.length(); i++) {
+                    meaning = JA.getJSONObject(i).optString("meaning");
+                    gradeString = JA.getJSONObject(i).optString("grade");
+
+                    if(!gradeString.equals("null")) {
+                        dict.put(JA.getJSONObject(i).optString("ka_utf"), meaning);
+                        grades.put(JA.getJSONObject(i).optString("ka_utf"), Integer.parseInt(gradeString));
+                    } else {
+                        System.out.println("null grade");
+                        dict.put(JA.getJSONObject(i).optString("ka_utf"), meaning);
+                        grades.put(JA.getJSONObject(i).optString("ka_utf"), 30); //30 being max grade
+                    }
+
+                }
+            } catch(JSONException e) {
+                e.printStackTrace();
+            }
+
+
+
+            System.out.println("dict size: " + dict.size());
+            System.out.println("-----------Grades Hash Map: " + grades.size());
             int count = 0;
-            for (String key: dict.keySet()) {
-                System.out.println(count + ") " + key + " : " + dict.get(key));
+            for (String key: grades.keySet()) {
+                System.out.println(count + ") " + key + " : " + grades.get(key));
                 count++;
             }
             System.out.println("--------------------------");
-            */
+
 
 
             System.out.println("response code: " + responseCode);
@@ -914,10 +949,11 @@ public class MainActivity extends Activity
             System.out.println("inventory from main");
             inventory.printInventory();
             System.out.println("Char drawn (from main): " + charDrawn);
-            //Date date = new Date();
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && charDrawn != null) { //null when coming from testActivity
+            if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && (charDrawn!=null) && (!charDrawn.equals("null"))) { //null when coming from testActivity
                 saveWritingHistory(charDrawn + " 0 " + LocalDate.now(), SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
+            } else {
+                System.out.println("char drawn is null");
             }
 
 
@@ -956,6 +992,7 @@ public class MainActivity extends Activity
 
         Intent intent = new Intent(this, GridViewTutorial.class);
         intent.putExtra("hashMap", dict);
+        intent.putExtra("gradesHashMap", grades);
         intent.putExtra("inventory", inventory);
         startActivityForResult(intent, 2);
     }

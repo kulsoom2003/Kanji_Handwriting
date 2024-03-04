@@ -10,12 +10,16 @@
     tools:context=".DrawCharActivity">
 
 
-    <Button
+    <TextView
         android:id="@+id/charToDraw"
         android:layout_width="360dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="40dp"
-        android:background="#B34040"
+        android:layout_height="60dp"
+        android:layout_marginTop="20dp"
+        android:background="#FFFFFF"
+        android:fontFamily="sans-serif-black"
+        android:gravity="center"
+        android:textColor="#B34040"
+        android:textSize="15sp"
         android:text="@string/app_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.49"
@@ -26,7 +30,7 @@
         android:id="@+id/drawCharCanvas"
         android:layout_width="360dp"
         android:layout_height="342dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="@+id/charToDraw"
         app:layout_constraintStart_toStartOf="@+id/charToDraw"
         app:layout_constraintTop_toBottomOf="@+id/charToDraw" />
@@ -67,7 +71,7 @@
     <Button
         android:id="@+id/button2"
         android:layout_width="360dp"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:layout_marginTop="24dp"
         android:background="#B34040"
         android:fontFamily="sans-serif-black"
@@ -80,8 +84,8 @@
     <Button
         android:id="@+id/button3"
         android:layout_width="360dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="12dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
         android:background="#B34040"
         android:fontFamily="sans-serif-black"
         android:onClick="clearCanvas"
@@ -91,15 +95,18 @@
         app:layout_constraintStart_toStartOf="@+id/button2"
         app:layout_constraintTop_toBottomOf="@+id/button2" />
 
-    <Button
+
+    <TextView
         android:id="@+id/countButton"
         android:layout_width="360dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="16dp"
-        android:background="#B34040"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
+        android:background="#FFFFFF"
         android:fontFamily="sans-serif-black"
-        android:onClick="clearCanvas"
-        android:text="count: "
+        android:gravity="center"
+        android:text="Character Information"
+        android:textColor="#B34040"
+        android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="@+id/button3"
         app:layout_constraintHorizontal_bias="0.214"
         app:layout_constraintStart_toStartOf="@+id/button3"

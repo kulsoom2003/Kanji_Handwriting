@@ -5,10 +5,12 @@ public class CourseModel {  //in tutorial this is CourseModel
     // and imgid for storing image id.
     private String kanjiChar;
     private int imgid;
+    private int grade;
 
-    public CourseModel(String kanjiChar, int imgid) {
+    public CourseModel(String kanjiChar, int imgid, int grade) {
         this.kanjiChar = kanjiChar;
         this.imgid = imgid;
+        this.grade = grade;
     }
 
     public String getKanjiChar() {
@@ -22,6 +24,7 @@ public class CourseModel {  //in tutorial this is CourseModel
     public int getImgid() {
         return imgid;
     }
+    public int getGrade() { return grade; }
 
     public void setImgid(int imgid) {
         this.imgid = imgid;

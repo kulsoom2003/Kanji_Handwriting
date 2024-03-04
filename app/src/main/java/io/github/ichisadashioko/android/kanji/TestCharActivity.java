@@ -1,5 +1,7 @@
 package io.github.ichisadashioko.android.kanji;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
@@ -18,6 +20,7 @@ import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -34,6 +37,8 @@ import java.util.HashMap;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -53,6 +58,8 @@ import io.github.ichisadashioko.android.kanji.views.HandwritingCanvas;
 import io.github.ichisadashioko.android.kanji.views.Inventory;
 import io.github.ichisadashioko.android.kanji.views.ResultButton;
 import io.github.ichisadashioko.android.kanji.views.TouchCallback;
+
+import java.time.temporal.ChronoUnit;
 
 
 
@@ -77,7 +84,7 @@ public class TestCharActivity extends Activity
 
     public int count = 0;
     public boolean isTextSaved = true;
-    public Button button;
+    public TextView charInfo;
     public DictionaryExample dictExample;
 
     public HashMap<String, String> dict;
@@ -151,7 +158,7 @@ public class TestCharActivity extends Activity
 
         System.out.println("Chars Learnt Information");
         for (String key : charsLearnt.keySet()) {
-            //System.out.println(key + ", " + charsLearnt.get(key));
+            System.out.println(key + ", " + charsLearnt.get(key));
             noOfTimesTested = Integer.parseInt(charsLearnt.get(key).split(" ")[0]);
             daysUntilNextTest = noOfTimesTested;
             reps = 20 - noOfTimesTested;
@@ -202,7 +209,7 @@ public class TestCharActivity extends Activity
         meaning = dict.get(characterToDraw);
 
         System.out.println("to draw: " + meaning + " ( " + characterToDraw + ")");
-        Button kanjiButton = findViewById(R.id.charToDraw);
+        TextView kanjiButton = findViewById(R.id.charToDraw);
         kanjiButton.setText("Draw the character for: " + meaning + " (" + characterToDraw + ") " + charsToTestEntry.getValue() + " times");
 
         ArrayList<String> databaseChars;
@@ -234,8 +241,13 @@ public class TestCharActivity extends Activity
         System.out.println("Number of matching Kanji: " + numberOfMatchingKanji);
 
 
-        button = findViewById(R.id.countButton);
-        button.setText(Integer.toString(count));
+        charInfo = findViewById(R.id.countButton);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            charInfo.setText("'" + meaning + "'\n Last tested: "
+                    + DAYS.between(LocalDate.parse(charsLearnt.get(characterToDraw).split(" ")[1]), LocalDate.now())
+                    + " days ago \n Times tested: " + (20 - charsToTestEntry.getValue()));
+        }
+
 
         canvas = findViewById(R.id.drawCharCanvas);
         resultContainer = findViewById(R.id.result_container); // from xml
@@ -395,11 +407,11 @@ public class TestCharActivity extends Activity
             inventory.printInventory();
             ////////////////////////////////
             System.out.println("Correct!!!!");
-            button = findViewById(R.id.countButton);
-            button.setText(Integer.toString(count)); //reset count button to show increased number
+            charInfo = findViewById(R.id.countButton);
+            charInfo.setText(Integer.toString(count)); //reset count button to show increased number
 
-            Button kanjiButton = findViewById(R.id.charToDraw);
-            kanjiButton.setText("Draw the character for: " + meaning + " (" + characterToDraw + ") " + (charsToTestEntry.getValue() - count) + " times");
+            TextView kanjiButton = findViewById(R.id.charToDraw);
+            kanjiButton.setText("Draw the character for '" + meaning + "' (" + characterToDraw + ") " + (charsToTestEntry.getValue() - count) + " times");
         }
 
         if(count == charsToTestEntry.getValue()) { //done reps
@@ -407,7 +419,7 @@ public class TestCharActivity extends Activity
             //update file here with new due date & reps.
             updateFileTestedChar(characterToDraw);
             //display correct
-            button.setText("Well done! Will add to inventory");
+            charInfo.setText("Well done! Will add to inventory");
             //display that treats were added to the inventory
 
             Handler handler = new Handler();

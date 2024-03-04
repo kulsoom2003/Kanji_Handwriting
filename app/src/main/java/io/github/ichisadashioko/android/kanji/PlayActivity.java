@@ -19,7 +19,7 @@ import io.github.ichisadashioko.android.kanji.views.Inventory;
 
 public class PlayActivity extends AppCompatActivity {
     public static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE_CODE = 0;
-    public TextView dangoCount, mochiCount, taiyakiCount;
+    public Button dangoCount, mochiCount, taiyakiCount;
     public Inventory inventory;
     public ImageView catSprite;
     public ProgressBar happiness;
@@ -41,11 +41,7 @@ public class PlayActivity extends AppCompatActivity {
         mochiCount = findViewById(R.id.mochiCount);
         taiyakiCount = findViewById(R.id.taiyakiCount);
         happiness = findViewById(R.id.progressBar);
-        happiness.setProgress(inventory.getDango());
-
-        Button playButton = findViewById(R.id.playButton);
-
-        System.out.println("found views by IDs");
+        happiness.setProgress(0);
 
         dangoCount.setText("Dango x" + Integer.toString(inventory.getDango()));
         mochiCount.setText("Mochi x" + Integer.toString(inventory.getMochi()));
@@ -53,27 +49,61 @@ public class PlayActivity extends AppCompatActivity {
         //inventoryText.setText(inventory.inventoryToString()); //reset count button to show increased number
         System.out.println("set all counts");
 
-        playButton.setBackgroundColor(Color.parseColor("#831B1B"));
+        checkSprite();
 
-        if(inventory.getDango() > 5 && inventory.getDango() <= 10) {
-            catSprite.setImageResource(R.drawable.cat_happy);
-        } else if(inventory.getDango() > 10 && inventory.getDango() <= 15) {
-            catSprite.setImageResource(R.drawable.cat_v_happy);
-        } else if(inventory.getDango() > 15) {
-            catSprite.setImageResource(R.drawable.cat_vv_happy);
-        }
 
     }
 
     public void goToMainPage(View view) {
         //
         System.out.println("Go To Main");
+        inventory.printInventory();
 
         Intent intent = new Intent();
         intent.putExtra("inventory", inventory);
         setResult(2, intent);
         finish();//finishing activity
 
+    }
+
+    public void checkSprite() {
+        if(happiness.getProgress() > 5 && happiness.getProgress() <= 10) {
+            catSprite.setImageResource(R.drawable.cat_happy);
+        } else if(happiness.getProgress() > 10 && happiness.getProgress() <= 15) {
+            catSprite.setImageResource(R.drawable.cat_v_happy);
+        } else if(happiness.getProgress() > 15) {
+            catSprite.setImageResource(R.drawable.cat_vv_happy);
+        }
+    }
+
+    public void feedDango(View view) {
+
+        if (inventory.getDango() > 0) {
+            dangoCount.setText("Dango x" + (inventory.getDango() - 1));
+            inventory.minusDango();
+            happiness.setProgress(happiness.getProgress() + 1);
+            checkSprite();
+        }
+    }
+
+    public void feedMochi(View view) {
+
+        if (inventory.getMochi() > 0) {
+            mochiCount.setText("Mochi x" + (inventory.getMochi() - 1));
+            inventory.minusMochi();
+            happiness.setProgress(happiness.getProgress() + 1);
+            checkSprite();
+        }
+    }
+
+    public void feedTaiyaki(View view) {
+
+        if (inventory.getTaiyaki() > 0) {
+            taiyakiCount.setText("Taiyaki x" + (inventory.getTaiyaki() - 1));
+            inventory.minusTaiyaki();
+            happiness.setProgress(happiness.getProgress() + 1);
+            checkSprite();
+        }
     }
 
 

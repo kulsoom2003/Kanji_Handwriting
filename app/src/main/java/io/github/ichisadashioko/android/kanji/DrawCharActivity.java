@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -17,6 +18,7 @@ import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -66,7 +68,7 @@ public class DrawCharActivity extends Activity
 
     public int count = 0;
     public boolean isTextSaved = true;
-    public Button button;
+    public TextView charInfo;
     public DictionaryExample dictExample;
 
     public HashMap<String, String> dict;
@@ -96,12 +98,9 @@ public class DrawCharActivity extends Activity
         }
         System.out.println("--------------------------");
         System.out.println("to draw: " + characterToDraw);
-        Button kanjiButton = findViewById(R.id.charToDraw);
-        Button learnButton = findViewById(R.id.learnButton);
+        TextView kanjiButton = findViewById(R.id.charToDraw);
 
-
-        kanjiButton.setText("Learn: Draw the character for: " + dict.get(characterToDraw) + " " + characterToDraw);
-        learnButton.setBackgroundColor(Color.parseColor("#831B1B"));
+        kanjiButton.setText("Draw the character for: '" + dict.get(characterToDraw) + "' " + characterToDraw + " (6) times");
 
 
         ArrayList<String> databaseChars;
@@ -133,8 +132,8 @@ public class DrawCharActivity extends Activity
         System.out.println("Number of matching Kanji: " + numberOfMatchingKanji);
 
 
-        button = findViewById(R.id.countButton);
-        button.setText(Integer.toString(count));
+        charInfo = findViewById(R.id.countButton);
+        charInfo.setText("Earn treats by drawing the character " + characterToDraw);
 
         canvas = findViewById(R.id.drawCharCanvas);
         resultContainer = findViewById(R.id.result_container); // from xml
@@ -232,15 +231,34 @@ public class DrawCharActivity extends Activity
             System.out.println("Correct!!!!");
             inventory.addDango();
             inventory.printInventory();
-            button = findViewById(R.id.countButton);
-            button.setText(Integer.toString(count)); //reset count button to show increased number
+            charInfo = findViewById(R.id.countButton);
+            charInfo.setText("Correct!"); //reset count button to show increased number
+
+            TextView kanjiButton = findViewById(R.id.charToDraw);
+            kanjiButton.setText("Draw the character for: '" + dict.get(characterToDraw) + "' " + characterToDraw + " (" + (6 - count) + ") times");
+        } else {
+            charInfo.setText("This looks like " + results.get(0).title + " meaning '" + dict.get(results.get(0).title) + "'");
         }
 
         if(count == 6) { //temporarily, for demo
             count = 0;
             charToSave = characterToDraw; //character is learnt, will be saved in file
-            button = findViewById(R.id.countButton);
-            button.setText(Integer.toString(count)); //reset count button to show increased number
+            charInfo = findViewById(R.id.countButton);
+            charInfo.setText("Character " + characterToDraw +" meaning '" + dict.get(characterToDraw) + "' learnt!"); //reset count button to show increased number
+            inventory.addMochi();
+            //ADD TO CHARS TO TEST!!!
+
+            //finish activity
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    Intent intent = new Intent();
+                    intent.putExtra("inventory", inventory);
+                    intent.putExtra("charDrawn", characterToDraw);
+                    setResult(2, intent);
+                    finish();//finishing activity
+                }
+            }, 3000);
         } //can replace this with a mod function. also make a 'resetCount' function
 
 

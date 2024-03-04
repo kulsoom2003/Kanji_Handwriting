@@ -50,12 +50,24 @@ public class Inventory implements Parcelable{
         this.treatsAndQuantity.put("Dango", treatsAndQuantity.get("Dango") + 1);
     }
 
+    public void minusDango() {
+        this.treatsAndQuantity.put("Dango", treatsAndQuantity.get("Dango") - 1);
+    }
+
     public void addMochi() {
         this.treatsAndQuantity.put("Mochi", treatsAndQuantity.get("Mochi") + 1);
     }
 
+    public void minusMochi() {
+        this.treatsAndQuantity.put("Dango", treatsAndQuantity.get("Mochi") - 1);
+    }
+
     public void addTaiyaki() {
         this.treatsAndQuantity.put("Taiyaki", treatsAndQuantity.get("Taiyaki") + 1);
+    }
+
+    public void minusTaiyaki() {
+        this.treatsAndQuantity.put("Dango", treatsAndQuantity.get("Taiyaki") - 1);
     }
 
     public int getDango() {

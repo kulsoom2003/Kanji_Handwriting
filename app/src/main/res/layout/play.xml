@@ -73,43 +73,46 @@
         app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/taiyaki_image" />
 
-    <TextView
+    <Button
         android:id="@+id/dangoCount"
         android:layout_width="80dp"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:background="#B34040"
         android:fontFamily="sans-serif-black"
         android:gravity="center"
         android:text="Dango x0"
+        android:onClick="feedDango"
         android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="@+id/mochiCount"
         app:layout_constraintEnd_toEndOf="@+id/imageView2"
         app:layout_constraintStart_toStartOf="@+id/imageView2"
         app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
-    <TextView
+    <Button
         android:id="@+id/mochiCount"
         android:layout_width="80dp"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:layout_marginTop="12dp"
         android:background="#B34040"
         android:fontFamily="sans-serif-black"
         android:gravity="center"
         android:text="Mochi x0"
+        android:onClick="feedMochi"
         android:textColor="#FFFFFF"
         app:layout_constraintEnd_toEndOf="@+id/imageView3"
         app:layout_constraintHorizontal_bias="0.486"
         app:layout_constraintStart_toStartOf="@+id/imageView3"
         app:layout_constraintTop_toBottomOf="@+id/imageView3" />
 
-    <TextView
+    <Button
         android:id="@+id/taiyakiCount"
         android:layout_width="80dp"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:background="#B34040"
         android:fontFamily="sans-serif-black"
         android:gravity="center"
         android:text="Taiyaki x0"
+        android:onClick="feedTaiyaki"
         android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="@+id/mochiCount"
         app:layout_constraintEnd_toEndOf="@+id/imageView4"

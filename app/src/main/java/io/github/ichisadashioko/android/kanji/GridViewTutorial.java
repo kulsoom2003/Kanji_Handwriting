@@ -25,6 +25,7 @@ import io.github.ichisadashioko.android.kanji.views.Inventory;
 
 public class GridViewTutorial extends AppCompatActivity { //activity
     public HashMap<String, String> dict;
+    public HashMap<String, Integer> grades;
     public Inventory inventory;
     GridView kanjiGV;
 
@@ -37,6 +38,7 @@ public class GridViewTutorial extends AppCompatActivity { //activity
 
         Intent intent = getIntent();
         dict = (HashMap<String, String>) intent.getSerializableExtra("hashMap");
+        grades = (HashMap<String, Integer>) intent.getSerializableExtra("gradesHashMap");
         inventory = getIntent().getParcelableExtra("inventory");
         System.out.println("inventory in GV Tutorial: ");
         inventory.printInventory();
@@ -86,13 +88,17 @@ public class GridViewTutorial extends AppCompatActivity { //activity
 
     public void showMeaning(View view) {
 
-        Button kanjiButton = (Button) findViewById(R.id.idButtonCourse);
-        String buttonText = kanjiButton.getText().toString();
+
+        //Button kanjiButton = findViewById(R.id.idGVcourses).findViewById(R.id.idButtonCourse);
+        //String buttonText = kanjiButton.getText().toString();
 
         Button meaningButton = (Button)view;
-        meaningButton.setText(dict.get(buttonText));
+        System.out.println("text: " + meaningButton.getText().toString().substring(0,1));
+        //System.out.println(dict.get("栄"));
+        String meaningText = dict.get(meaningButton.getText().toString().substring(0,1));
+        meaningButton.setText(meaningText);
 
-        System.out.println("show:" + buttonText + ", " + dict.get(buttonText));
+        System.out.println("show:" + meaningButton.getText().toString().substring(0,1) + ", " + meaningText);
     }
 
     @Override
@@ -147,7 +153,7 @@ public class GridViewTutorial extends AppCompatActivity { //activity
         for (String key: dict.keySet()) {
             //System.out.println(count + ") " + key);
             //add them to array list
-            kanjiArrayList.add(new CourseModel(key, R.drawable.ic_search));
+            kanjiArrayList.add(new CourseModel(key, R.drawable.ic_search, grades.get(key)));
 
             count++;
         }
