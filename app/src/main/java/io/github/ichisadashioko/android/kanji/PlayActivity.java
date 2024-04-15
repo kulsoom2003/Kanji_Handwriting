@@ -15,13 +15,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import io.github.ichisadashioko.android.kanji.views.Inventory;
+import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 
 public class PlayActivity extends AppCompatActivity {
     public static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE_CODE = 0;
+    public int maxHappiness = 20;
     public Button dangoCount, mochiCount, taiyakiCount;
-    public Inventory inventory;
     public ImageView catSprite;
+    public TextView catSpeech;
     public ProgressBar happiness;
 
     @Override
@@ -32,35 +35,27 @@ public class PlayActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.play); //settings
 
-        inventory = getIntent().getParcelableExtra("inventory");
         catSprite = findViewById(R.id.catSprite);
-        System.out.println("inventory from Play");
-        inventory.printInventory();
-
         dangoCount = findViewById(R.id.dangoCount);
         mochiCount = findViewById(R.id.mochiCount);
+        catSpeech = findViewById(R.id.catSpeech);
         taiyakiCount = findViewById(R.id.taiyakiCount);
         happiness = findViewById(R.id.progressBar);
-        happiness.setProgress(0);
+        happiness.setProgress(getInventoryTreat("Happiness"));
 
-        dangoCount.setText("Dango x" + Integer.toString(inventory.getDango()));
-        mochiCount.setText("Mochi x" + Integer.toString(inventory.getMochi()));
-        taiyakiCount.setText("Taiyaki x" + Integer.toString(inventory.getTaiyaki()));
-        //inventoryText.setText(inventory.inventoryToString()); //reset count button to show increased number
+        dangoCount.setText("Dango x" + Integer.toString(getInventoryTreat("Dango")));
+        mochiCount.setText("Mochi x" + Integer.toString(getInventoryTreat("Mochi")));
+        taiyakiCount.setText("Taiyaki x" + Integer.toString(getInventoryTreat("Taiyaki")));
         System.out.println("set all counts");
 
         checkSprite();
-
 
     }
 
     public void goToMainPage(View view) {
         //
         System.out.println("Go To Main");
-        inventory.printInventory();
-
         Intent intent = new Intent();
-        intent.putExtra("inventory", inventory);
         setResult(2, intent);
         finish();//finishing activity
 
@@ -76,38 +71,104 @@ public class PlayActivity extends AppCompatActivity {
         }
     }
 
-    public void feedDango(View view) {
+    public void updateInventory(String treat, int increment) { //treat may be a treat or happiness
+        try {
+            BufferedReader file = new BufferedReader(new FileReader("/storage/emulated/0/Download/handwriting_data/inventory_file.txt"));
+            String line;
+            String input = ""; //string to store file contents
 
-        if (inventory.getDango() > 0) {
-            dangoCount.setText("Dango x" + (inventory.getDango() - 1));
-            inventory.minusDango();
-            happiness.setProgress(happiness.getProgress() + 1);
+            while ((line = file.readLine()) != null) {
+                input += line + '\n'; //add each line of the file to input string
+            }
+
+            String[] lines = input.split("\n");
+            String lineToReplace = "";
+            for(String element : lines) {
+                if(element.split(" ")[0].equals(treat)) { //locates line with matching parameter
+                    lineToReplace = element;
+                }
+            }
+
+            String replaceWith = "";
+            int noOfTreats = Integer.parseInt(lineToReplace.split(" ")[1]); //locates current number of treats/happiness
+            if(noOfTreats == 0 && increment < 0) {
+                return;
+            }
+
+            replaceWith = treat + " " + (noOfTreats + increment);
+            input = input.replace(lineToReplace, replaceWith);
+
+            FileOutputStream File = new FileOutputStream("/storage/emulated/0/Download/handwriting_data/inventory_file.txt");
+            File.write(input.getBytes());
+
+        } catch (Exception e) {
+            System.out.println("Problem reading file.");
+        }
+    }
+    //only different to the method in the play activity is that a zero check is performed. it's okay before since treats are only added in other activities, not subtracted
+
+    public int getInventoryTreat(String treat) {
+        try {
+            BufferedReader file = new BufferedReader(new FileReader("/storage/emulated/0/Download/handwriting_data/inventory_file.txt"));
+            String line;
+            String input = ""; //string to store file contents
+
+            while ((line = file.readLine()) != null) {
+                input += line + '\n'; //add each line of the file to input string
+            }
+
+            String[] lines = input.split("\n");
+            String lineToReturn = "";
+            for(String element : lines) {
+                if(element.split(" ")[0].equals(treat)) { //locates line with matching parameter
+                    lineToReturn = element;
+                }
+            }
+
+            int noOfTreats = Integer.parseInt(lineToReturn.split(" ")[1]); //locates current number of treats/happiness
+            return noOfTreats;
+
+        } catch (Exception e) {
+            System.out.println("Problem reading file.");
+        }
+        return -1; // if an exception is caught
+    }
+    public void feedDango(View view) {
+        if(getInventoryTreat("Dango") > 0 && getInventoryTreat("Happiness") < maxHappiness) {
+            updateInventory("Dango", -1);
+            dangoCount.setText("Dango x" + (getInventoryTreat("Dango")));
+            updateInventory("Happiness", 1);
+            happiness.setProgress(getInventoryTreat("Happiness"));
             checkSprite();
+        } else if (getInventoryTreat("Happiness") >= maxHappiness) {
+            catSpeech.setText("I'm full");
         }
     }
 
     public void feedMochi(View view) {
-
-        if (inventory.getMochi() > 0) {
-            mochiCount.setText("Mochi x" + (inventory.getMochi() - 1));
-            inventory.minusMochi();
-            happiness.setProgress(happiness.getProgress() + 1);
+        if(getInventoryTreat("Mochi") > 0 && getInventoryTreat("Happiness") <= maxHappiness) {
+            updateInventory("Mochi", -1);
+            mochiCount.setText("Mochi x" + (getInventoryTreat("Mochi")));
+            updateInventory("Happiness", 1);
+            happiness.setProgress(getInventoryTreat("Happiness"));
             checkSprite();
+            System.out.println("fed from inventory file");
+        } else if (getInventoryTreat("Happiness") >= maxHappiness) {
+            catSpeech.setText("I'm full");
         }
     }
 
     public void feedTaiyaki(View view) {
-
-        if (inventory.getTaiyaki() > 0) {
-            taiyakiCount.setText("Taiyaki x" + (inventory.getTaiyaki() - 1));
-            inventory.minusTaiyaki();
-            happiness.setProgress(happiness.getProgress() + 1);
+        if(getInventoryTreat("Taiyaki") > 0 && getInventoryTreat("Happiness") <= maxHappiness) {
+            updateInventory("Taiyaki", -1);
+            taiyakiCount.setText("Taiyaki x" + (getInventoryTreat("Taiyaki")));
+            updateInventory("Happiness", 1);
+            happiness.setProgress(getInventoryTreat("Happiness"));
             checkSprite();
+        } else if (getInventoryTreat("Happiness") >= maxHappiness) {
+            catSpeech.setText("I'm full");
         }
     }
-
-
-
 }
 
 //inventory passed correctly from Test

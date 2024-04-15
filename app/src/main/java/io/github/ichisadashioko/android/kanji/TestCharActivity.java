@@ -55,7 +55,6 @@ import io.github.ichisadashioko.android.kanji.tflite.Recognition;
 import io.github.ichisadashioko.android.kanji.views.BitmapView;
 import io.github.ichisadashioko.android.kanji.views.CanvasPoint2D;
 import io.github.ichisadashioko.android.kanji.views.HandwritingCanvas;
-import io.github.ichisadashioko.android.kanji.views.Inventory;
 import io.github.ichisadashioko.android.kanji.views.ResultButton;
 import io.github.ichisadashioko.android.kanji.views.TouchCallback;
 
@@ -88,7 +87,6 @@ public class TestCharActivity extends Activity
     public DictionaryExample dictExample;
 
     public HashMap<String, String> dict;
-    public Inventory inventory;
     public String meaning;
     public String characterToDraw;
     public HashMap<String, String> charsLearnt;
@@ -107,8 +105,6 @@ public class TestCharActivity extends Activity
 
         Intent intent = getIntent();
         dict = (HashMap<String, String>) intent.getSerializableExtra("hashMap");
-        inventory = getIntent().getParcelableExtra("inventory");
-        //inventory = (HashMap<String, Integer>) intent.getSerializableExtra("inventory");
         //meaning = intent.getStringExtra("meaningToDraw");
 
         characterToDraw = intent.getStringExtra("kanjiToDraw");
@@ -122,15 +118,29 @@ public class TestCharActivity extends Activity
         //String charLearntNoTestedAndDate;
         try {
             System.out.println("locating file for LearntChars");
-            File myObj = new File("/storage/emulated/0/Download/handwriting_data/learnt_characters/000000.txt");
+            File myObj = new File("/storage/emulated/0/Download/handwriting_data/learnt_characters_file.txt");
             System.out.println("located file for LearntChars");
             Scanner myReader = new Scanner(myObj);
+
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
                 System.out.println(data);
+
+                //check the line is in the right format: symbol exists with length 1
+                if(data.split(" ").length != 3 || data.split(" ")[0].length() != 1) { //checks 3 blocks and symbol is one char
+                    System.out.println("Chars Learnt line incorrect format");
+                    //stop somehow
+                    return; //if this happens then the app doesn't crash, it just shows default info. but then buttons make it crash
+                } else {
+                    System.out.println("line: " + data.split(" ")[0] + ":" + data.split(" ")[1] + ":" + data.split(" ")[2]);
+                }
+
                 // add to charsLearnt HashMap
-                String charLearntKey = data.substring(0,1);
-                String charLearntNoTestedAndDate = data.substring(2); //start from 2nd index (after char and space)
+                //String charLearntKey = data.substring(0,1); //split this on " " instead
+                String charLearntKey = data.split(" ")[0];
+                //String charLearntNoTestedAndDate = data.substring(2); //start from 2nd index (after char and space)
+                String charLearntNoTestedAndDate = data.split(" ")[1] + " " + data.split(" ")[2]; //start from 2nd index (after char and space)
+
                 //System.out.println(charLearntKey + ", " + charLearntNoTestedAndDate);
                 //charsLearnt.put(charLearntKey, charLearntNoTestedAndDate);
                 charsLearnt.put(charLearntKey, charLearntNoTestedAndDate);
@@ -158,20 +168,26 @@ public class TestCharActivity extends Activity
 
         System.out.println("Chars Learnt Information");
         for (String key : charsLearnt.keySet()) {
-            System.out.println(key + ", " + charsLearnt.get(key));
+            //System.out.println(key + ", " + charsLearnt.get(key));
             noOfTimesTested = Integer.parseInt(charsLearnt.get(key).split(" ")[0]);
+            //check the line is in the right format: noOfTimesTested is a non-negative number
+
             daysUntilNextTest = noOfTimesTested;
             reps = 20 - noOfTimesTested;
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 dateTemp = LocalDate.parse(charsLearnt.get(key).split(" ")[1]);
+                //check the line is in the right format: check this date is valid?
+
+
                 dueDate = dateTemp.plusDays(daysUntilNextTest);
 
                 //print info
-                System.out.println(key + ") " + dueDate + ", reps: " + reps);
+                //System.out.println(key + ") due: " + dueDate + ", reps: " + reps);
 
-                if(dueDate.isBefore(LocalDate.now()) || dueDate.equals(LocalDate.now())) { //shouldn't equal, but for testing purposes will keep this for now
+                if(dueDate.isBefore(LocalDate.now())) { //shouldn't equal, but for testing purposes will keep this for now
                     charsToTest.put(key, reps);
+                    System.out.println(key + " was due: " + dueDate + ", with reps: " + reps);
                 } else {
                     System.out.println(key + " not due yet");
                 }
@@ -210,7 +226,7 @@ public class TestCharActivity extends Activity
 
         System.out.println("to draw: " + meaning + " ( " + characterToDraw + ")");
         TextView kanjiButton = findViewById(R.id.charToDraw);
-        kanjiButton.setText("Draw the character for: " + meaning + " (" + characterToDraw + ") " + charsToTestEntry.getValue() + " times");
+        kanjiButton.setText("Draw the character for '" + meaning + "' " + (charsToTestEntry.getValue() - count) + " times");
 
         ArrayList<String> databaseChars;
 
@@ -287,10 +303,37 @@ public class TestCharActivity extends Activity
         dictExample = new DictionaryExample(); //NOT the same as APICall dict
         dictExample.loadDict();
         System.out.println("dictionary return: " + dictExample.getFromKey("two"));
+    }
 
-        //updateFileTestedChar("夕");
+    public void updateInventory(String treat, int increment) { //treat may be a treat or happiness
+        try {
+            BufferedReader file = new BufferedReader(new FileReader("/storage/emulated/0/Download/handwriting_data/inventory_file.txt"));
+            String line;
+            String input = ""; //string to store file contents
 
+            while ((line = file.readLine()) != null) {
+                input += line + '\n'; //add each line of the file to input string
+            }
 
+            String[] lines = input.split("\n");
+            String lineToReplace = "";
+            for(String element : lines) {
+                if(element.split(" ")[0].equals(treat)) { //locates line with matching parameter
+                    lineToReplace = element;
+                }
+            }
+
+            String replaceWith = "";
+            int noOfTreats = Integer.parseInt(lineToReplace.split(" ")[1]); //locates current number of treats/happiness
+            replaceWith = treat + " " + (noOfTreats + increment);
+            input = input.replace(lineToReplace, replaceWith);
+
+            FileOutputStream File = new FileOutputStream("/storage/emulated/0/Download/handwriting_data/inventory_file.txt");
+            File.write(input.getBytes());
+
+        } catch (Exception e) {
+            System.out.println("Problem reading file.");
+        }
     }
 
     public void updateFileTestedChar(String charTested) {
@@ -298,7 +341,7 @@ public class TestCharActivity extends Activity
         try {
             System.out.println("opening file to update");
             // input the file content to the String "input"
-            BufferedReader file = new BufferedReader(new FileReader("/storage/emulated/0/Download/handwriting_data/learnt_characters/000000.txt"));
+            BufferedReader file = new BufferedReader(new FileReader("/storage/emulated/0/Download/handwriting_data/learnt_characters_file.txt"));
             String line;
             String input = "";
 
@@ -336,7 +379,7 @@ public class TestCharActivity extends Activity
             System.out.println("new input: " + input);
 
             // write the new String with the replaced line OVER the same file
-            FileOutputStream File = new FileOutputStream("/storage/emulated/0/Download/handwriting_data/learnt_characters/000000.txt");
+            FileOutputStream File = new FileOutputStream("/storage/emulated/0/Download/handwriting_data/learnt_characters_file.txt");
             File.write(input.getBytes());
 
         } catch (Exception e) {
@@ -348,7 +391,6 @@ public class TestCharActivity extends Activity
         System.out.println("Go To Main");
 
         Intent intent = new Intent();
-        intent.putExtra("inventory", inventory);
         setResult(2, intent);
         finish();//finishing activity
     }
@@ -403,15 +445,14 @@ public class TestCharActivity extends Activity
 
         if(results.get(0).title.equals(characterToDraw)) { // meaning
             count++; //increase count of number of evaluations so can count until 20 character draws
-            inventory.addDango();
-            inventory.printInventory();
-            ////////////////////////////////
+            updateInventory("Dango", 1);
+
             System.out.println("Correct!!!!");
             charInfo = findViewById(R.id.countButton);
             charInfo.setText(Integer.toString(count)); //reset count button to show increased number
 
             TextView kanjiButton = findViewById(R.id.charToDraw);
-            kanjiButton.setText("Draw the character for '" + meaning + "' (" + characterToDraw + ") " + (charsToTestEntry.getValue() - count) + " times");
+            kanjiButton.setText("Draw the character for '" + meaning + "' " + (charsToTestEntry.getValue() - count) + " times");
         }
 
         if(count == charsToTestEntry.getValue()) { //done reps
@@ -419,36 +460,23 @@ public class TestCharActivity extends Activity
             //update file here with new due date & reps.
             updateFileTestedChar(characterToDraw);
             //display correct
-            charInfo.setText("Well done! Will add to inventory");
+            updateInventory("Taiyaki", 1);
+            charInfo.setText("Well done! Earned x1 Taiyaki");
             //display that treats were added to the inventory
 
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 public void run() {
                     Intent intent = new Intent();
-                    intent.putExtra("inventory", inventory);
                     setResult(2, intent);
                     finish();//finishing activity
                 }
             }, 3000);
 
-            /*
-            Intent intent = new Intent();
-            intent.putExtra("inventory", inventory);
-            setResult(2, intent);
-            finish();//finishing activity
-
-             */
-
-            //count = 0;
-            //button = findViewById(R.id.countButton);
-            //button.setText(Integer.toString(count)); //reset count button to show increased number
         } //can replace this with a mod function. also make a 'resetCount' function
 
 
         System.out.println("draw char, Kanji is probably: " + results.get(0).title);
-        //here is where you should export/save the kanji to the file
-        //pushText(results.get(0).title);
         saveWritingHistory(results.get(0).title + " label: evaluated <- drawChar");
 
         clearCanvas(view); //will keep this afterwards, it's useful to see results for now

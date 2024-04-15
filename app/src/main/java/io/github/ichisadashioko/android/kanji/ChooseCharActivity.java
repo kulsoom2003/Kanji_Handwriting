@@ -50,7 +50,7 @@ public class ChooseCharActivity extends AppCompatActivity {
 
     public String dataFromAPI = "";
     public HashMap<String, String> dict;
-    public Inventory inventory;
+    //public Inventory inventory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,11 +59,9 @@ public class ChooseCharActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.choose_char); //settings
 
-
-
         //
         dict = new HashMap<String, String>();
-        inventory = getIntent().getParcelableExtra("inventory");
+        //inventory = getIntent().getParcelableExtra("inventory");
 
         dict.put("one", "一");
         dict.put("two", "二");
@@ -90,7 +88,7 @@ public class ChooseCharActivity extends AppCompatActivity {
         System.out.println("Go To Main");
 
         Intent intent = new Intent();
-        intent.putExtra("inventory", inventory);
+        //intent.putExtra("inventory", inventory);
         setResult(2, intent);
         finish();//finishing activity
     }

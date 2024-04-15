@@ -21,12 +21,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import io.github.ichisadashioko.android.kanji.views.Inventory;
+//import io.github.ichisadashioko.android.kanji.views.Inventory;
 
 public class GridViewTutorial extends AppCompatActivity { //activity
     public HashMap<String, String> dict;
     public HashMap<String, Integer> grades;
-    public Inventory inventory;
+    //public Inventory inventory;
     GridView kanjiGV;
 
     public String characterToDraw;
@@ -39,9 +39,9 @@ public class GridViewTutorial extends AppCompatActivity { //activity
         Intent intent = getIntent();
         dict = (HashMap<String, String>) intent.getSerializableExtra("hashMap");
         grades = (HashMap<String, Integer>) intent.getSerializableExtra("gradesHashMap");
-        inventory = getIntent().getParcelableExtra("inventory");
-        System.out.println("inventory in GV Tutorial: ");
-        inventory.printInventory();
+        //inventory = getIntent().getParcelableExtra("inventory");
+        //System.out.println("inventory in GV Tutorial: ");
+        //inventory.printInventory();
         processDict();
 
         System.out.println("extra data: ");
@@ -82,7 +82,7 @@ public class GridViewTutorial extends AppCompatActivity { //activity
         //intent.putExtra("message_key", "im going to ACE this project!!!");
         intent.putExtra("hashMap", dict);
         intent.putExtra("kanjiToDraw", buttonText); //put the element that was clicked here
-        intent.putExtra("inventory", inventory);
+        //intent.putExtra("inventory", inventory);
         startActivityForResult(intent, 2);
     }
 
@@ -108,14 +108,14 @@ public class GridViewTutorial extends AppCompatActivity { //activity
         // check if the request code is same as what is passed  here it is 2
         if(requestCode==2)
         {
-            inventory = data.getParcelableExtra("inventory");
+            //inventory = data.getParcelableExtra("inventory");
             characterToDraw = data.getStringExtra("charDrawn");
 
             System.out.println("inventory from grid view----");
-            inventory.printInventory();
+            //inventory.printInventory();
 
             Intent intent = new Intent();
-            intent.putExtra("inventory", inventory);
+            //intent.putExtra("inventory", inventory);
             intent.putExtra("charDrawn", characterToDraw);
             System.out.println("character drawn (from GV): " + characterToDraw);
             setResult(2, intent);
@@ -127,11 +127,11 @@ public class GridViewTutorial extends AppCompatActivity { //activity
 
     public void goToMainPage(View view) {
         System.out.println("GV Tutorial: Go To Main");
-        inventory.printInventory();
+        //inventory.printInventory();
 
         Intent intent = new Intent();
-        intent.putExtra("inventory", inventory);
-        setResult(2, intent);
+        //intent.putExtra("inventory", inventory);
+        //setResult(2, intent);
         finish();//finishing activity
     }
 

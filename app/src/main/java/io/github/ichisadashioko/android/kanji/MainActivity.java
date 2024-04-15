@@ -45,14 +45,15 @@ import io.github.ichisadashioko.android.kanji.tflite.Recognition;
 import io.github.ichisadashioko.android.kanji.views.BitmapView;
 import io.github.ichisadashioko.android.kanji.views.CanvasPoint2D;
 import io.github.ichisadashioko.android.kanji.views.HandwritingCanvas;
-import io.github.ichisadashioko.android.kanji.views.Inventory;
 import io.github.ichisadashioko.android.kanji.views.ResultButton;
 import io.github.ichisadashioko.android.kanji.views.TouchCallback;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -93,6 +94,8 @@ public class MainActivity extends Activity
     // ~/Download/handwriting_data/writing_history/
     public static final String WRITING_LOG_DIR_NAME = "writing_history";
     public static final String WRITING_LOG_DIR_NAME_NEW_FILE = "learnt_characters"; //has chars, date last learnt, no. of times tested (test in priority for SRS)
+    public static final String LEARNT_CHARS_FILE = "learnt_characters_file.txt";
+    public static final String INVENTORY_FILE = "inventory_file.txt";
     /**
      * 5 KBs for text file.
      *
@@ -101,22 +104,22 @@ public class MainActivity extends Activity
      */
     public static final int MAX_LOG_SIZE = 5 * 1024;
 
-    public HandwritingCanvas canvas;
+    //public HandwritingCanvas canvas;
     public KanjiClassifier tflite;
 
     /** I keep track of this view to scroll to start when we populate the result list. */
-    public HorizontalScrollView resultListScrollView;
+    //public HorizontalScrollView resultListScrollView;
 
-    public LinearLayout resultContainer;
+    //public LinearLayout resultContainer;
 
     /**
      * This variable is used to store the pixel value converted from dp value stored in dimens.xml.
      * I use this value to set the size for the result view.
      */
-    public int resultViewWidth;
+    //public int resultViewWidth;
 
     // The EditText is used to store the input text.
-    public EditText textRenderer;
+    //public EditText textRenderer;
 
     /** flags for clearing the canvas or evaluating the image data while it's being drawn. */
     public boolean autoEvaluate;
@@ -128,29 +131,26 @@ public class MainActivity extends Activity
      * label to low accuracy point that the correct label does not show in the result list. We have
      * to manually type the correct label and save it ourselves for future training.
      */
-    public EditText customLabelEditText;
+    //public EditText customLabelEditText;
 
     /**
      * Variables to keep track of the data that we are currently seeing. I need these to store
      * custom labels that the model does not have or the model evaluates the data wrong (not showing
      * in the result list).
      */
-    public Bitmap currentEvaluatingImage;
+    //public Bitmap currentEvaluatingImage;
 
-    public List<List<CanvasPoint2D>> currentEvaluatingWritingStrokes;
+    //public List<List<CanvasPoint2D>> currentEvaluatingWritingStrokes;
 
     // I set this to `true` because the text is empty.
     public boolean isTextSaved = true;
 
-    public BitmapView bitmapView;
+    //public BitmapView bitmapView;
     public HashMap<String, String> dict; //dictionary
     public HashMap<String, Integer> grades; //maps kanji to grade
+    public HashMap<String, String> radicals; //maps kanji to grade
     public GridView kanjiGV;
-
-    //make inventory
-    public Inventory inventory; //errors because passing an object to another activity
     public String charDrawn;
-    //public HashMap<String, Integer> inventory;
     public HashMap<String, String>  charsLearnt; // format: character, no.tested date
 
 
@@ -161,6 +161,7 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /*
         canvas = findViewById(R.id.canvas);
         resultContainer = findViewById(R.id.result_container);
         resultViewWidth = (int) getResources().getDimension(R.dimen.result_size);
@@ -169,10 +170,12 @@ public class MainActivity extends Activity
         resultListScrollView = findViewById(R.id.result_container_scroll_view);
         bitmapView = findViewById(R.id.preview_bitmap);
 
+         */
+
         dict = new HashMap<String, String>();
         grades = new HashMap<String, Integer>();
-        inventory = new Inventory();
-        inventory.printInventory();
+        radicals = new HashMap<String, String>();
+        createEmptyInventory(SAVE_DIRECTORY_NAME, INVENTORY_FILE);
 
         try {
             new APICallsFromClass().execute().get(); //fill the dictionary
@@ -187,7 +190,8 @@ public class MainActivity extends Activity
         // I add a TouchCallback interface because if we override the event listener,
         // the canvas is not working correctly. Our custom canvas manually handle touch
         // events, because of that add EventListener may break out canvas functionality.
-        canvas.touchCallback = this;
+
+        //canvas.touchCallback = this;
 
         try {
             tflite = new KanjiClassifier(this);
@@ -195,6 +199,7 @@ public class MainActivity extends Activity
             e.printStackTrace();
         }
 
+        /*
         // This is a Kanji handwriting font. It looks much better than the default font.
         Typeface kanjiTypeface =
                 Typeface.createFromAsset(getApplicationContext().getAssets(), KANJI_FONT_PATH);
@@ -203,6 +208,8 @@ public class MainActivity extends Activity
 
         autoEvaluate = isAutoEvaluateEnabled();
         autoClear = isAutoClearEnabled();
+
+         */
 
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(this);
@@ -246,14 +253,30 @@ public class MainActivity extends Activity
             HandwritingCanvas.WritingStrokeWidth = writingStrokeWidth;
         }
 
-/*
-        saveWritingHistory("夕 17 2024-02-10", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
-        saveWritingHistory("士 15 2024-02-27", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
-        saveWritingHistory("天 8 2024-03-22", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
-        saveWritingHistory("入 16 2024-01-01", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
-        System.out.println("saved in new file");
 
- */
+
+        updateInventory("Dango", 10);
+        updateInventory("Mochi", 5);
+        updateInventory("Taiyaki", 3);
+        updateInventory("Happiness", 18);
+
+
+
+        /*
+        appendFile("夕 17 2024-02-10", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE, LEARNT_CHARS_FILE);
+        appendFile("士 15 2024-02-27", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE, LEARNT_CHARS_FILE);
+        appendFile("天 8 2024-03-02", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE, LEARNT_CHARS_FILE);
+        appendFile("入 16 2024-01-01", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE, LEARNT_CHARS_FILE);
+        System.out.println("saved in new file");
+        */
+
+
+
+
+
+
+
+
 
 
 
@@ -438,13 +461,16 @@ public class MainActivity extends Activity
         return file.mkdirs();
     }
 
+    /*
     public void pushText(String text) { //sets content of first typing bar to text given
         isTextSaved = false;
         textRenderer.setText(textRenderer.getText() + text);
         textRenderer.setSelection(textRenderer.getText().length());
     }
 
-    /**
+     */
+
+    /*
      * Create a view to show the recognition in the UI. I also setup event listener for each view in
      * order to add text if the view is clicked.
      *
@@ -456,6 +482,8 @@ public class MainActivity extends Activity
      * @param writingStrokes list of touch points
      * @return
      */
+
+    /*
     public View createButtonFromResult(
             Recognition r, Bitmap image, List<List<CanvasPoint2D>> writingStrokes) {
         ResultButton btn = new ResultButton(this, null, r.title, r.confidence);
@@ -485,12 +513,16 @@ public class MainActivity extends Activity
         return btn;
     }
 
-    /**
+     */
+
+    /*
      * Get the image from the canvas and use the tflite model to evaluate the image. After the
      * results are returned, show them on the UI.
      *
      * @param view the View that triggers this method.
      */
+
+    /*
     public synchronized void runClassifier(View view) {
         if (canvas == null || tflite == null || resultContainer == null) {
             return;
@@ -525,14 +557,114 @@ public class MainActivity extends Activity
         resultListScrollView.scrollTo(0, 0);
     }
 
-    public void saveWritingHistory(final String text, String saveDirectoryName, String writingLogDirName) { //saves contents of first typing bar in a file. Updates the same file.
+     */
+
+    //make a method to add to the inventory
+
+    public void createEmptyInventory(String saveDirectoryName, String fileName) {
+        try {
+
+            File downloadDirectory =
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS); //Environment imported library, directory_downloads property of environment
+            String rootSavePath = downloadDirectory.getAbsolutePath() + "/" + saveDirectoryName; //parameter
+            rootSavePath = rootSavePath.replaceAll("/+", "/");
+            if (!prepareDirectory(rootSavePath)) { //creates directory for rootSavePath
+                throw new Exception(String.format("Cannot create directory: %s", rootSavePath));
+            }
+
+            System.out.println("Created directory: " + rootSavePath);
+
+            String saveFilePath;
+            File saveFile;
+
+            do {
+
+                saveFilePath = rootSavePath + "/" + fileName;
+                saveFilePath = saveFilePath.replace("/+", "/");
+                saveFile = new File(saveFilePath);
+                System.out.println("saveFilePath: " + saveFilePath);
+
+
+                if (!saveFile.exists()) {
+                    saveFile.createNewFile();
+                    System.out.println("No inventory, creating one");
+                } else {
+                    System.out.println("Inventory already exists");
+                    return;
+                }
+
+            } while (saveFile.length() > MAX_LOG_SIZE);
+
+            OutputStreamWriter osw =
+                    new OutputStreamWriter(new FileOutputStream(saveFile, true), "utf8"); //writes to file
+            System.out.println("written to file");
+            osw.append("Dango 0\nMochi 0\nTaiyaki 0\nHappiness 0\n");
+            //osw.append('\n');
+            //new FileOutputStream(saveFile).close();
+            osw.flush();
+            osw.close();
+            isTextSaved = true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void updateInventory(String treat, int increment) { //treat may be a treat or happiness
+        try {
+            BufferedReader file = new BufferedReader(new FileReader("/storage/emulated/0/Download/handwriting_data/inventory_file.txt"));
+            String line;
+            String input = ""; //string to store file contents
+
+            while ((line = file.readLine()) != null) {
+                input += line + '\n'; //add each line of the file to input string
+            }
+
+            String[] lines = input.split("\n");
+            String lineToReplace = "";
+            for(String element : lines) {
+                if(element.split(" ")[0].equals(treat)) { //locates line with matching parameter
+                    lineToReplace = element;
+                }
+            }
+
+            String replaceWith = "";
+            int noOfTreats = Integer.parseInt(lineToReplace.split(" ")[1]); //locates current number of treats/happiness
+            replaceWith = treat + " " + (noOfTreats + increment);
+            input = input.replace(lineToReplace, replaceWith);
+
+            FileOutputStream File = new FileOutputStream("/storage/emulated/0/Download/handwriting_data/inventory_file.txt");
+            File.write(input.getBytes());
+
+        } catch (Exception e) {
+            System.out.println("Problem reading file.");
+        }
+    }
+
+    public void appendFile(String text, String saveDirectoryName, String redundant, String fileName) { //saves contents of first typing bar in a file. Updates the same file.
         System.out.println("text to save: " + text);
 
+        //System.out.println("Symbol in line:" +  text.split(" ")[0]);
+        //System.out.println(text.split(" ")[0].length());
+
+
         //if (isTextSaved || text.isEmpty()) {
-        if (text.isEmpty()) {
-            System.out.println("isTextSaved: " + isTextSaved);
+        // check that line is in the right format
+        if(text.isEmpty()) {
+            System.out.println("empty text");
+            return;
+        } else if(text.split(" ")[0].length() != 1) { // check that line is in the right format
+            System.out.println("Symbol in line:" +  text.split(" ")[0]);
             return;
         }
+
+        /*
+        if (text.isEmpty() || text.split(" ")[0].length() != 1) {
+            System.out.println("isTextSaved: " + isTextSaved);
+            System.out.println("Symbol in line:" +  text.split(" ")[0]);
+            return;
+        }
+
+         */
 
         try {
             if (!canSaveWritingData()) { //checks permission from settings in the app
@@ -549,13 +681,15 @@ public class MainActivity extends Activity
                 throw new Exception(String.format("Cannot create directory: %s", rootSavePath));
             }
 
+            /*
             String writingHistoryDirectoryPath = rootSavePath + "/" + writingLogDirName; // file path to save file in
             if (!prepareDirectory(writingHistoryDirectoryPath)) {
                 throw new Exception(
                         String.format("Cannot create directory: %s", writingHistoryDirectoryPath));
             }
+            */
             //above creates directory to save file in
-            System.out.println("Created directory: " + writingHistoryDirectoryPath);
+            System.out.println("Created directory: " + rootSavePath);
 
             int indexCounter = 0;
             String saveFilePath;
@@ -563,20 +697,26 @@ public class MainActivity extends Activity
 
             do {
 
-                if(saveDirectoryName.equals("learnt_characters")) {
+                /*
+                if(writingLogDirName.equals("learnt_characters")) {
                     saveFilePath = writingHistoryDirectoryPath + "/learnt_characters_file.txt";
-                } else {
+                } else if {
                     saveFilePath = writingHistoryDirectoryPath + "/" + String.format("%06d.txt", indexCounter);
                 }
 
-                        saveFilePath = saveFilePath.replace("/+", "/");
+                 */
+
+                saveFilePath = rootSavePath + "/" + fileName;
+                saveFilePath = saveFilePath.replace("/+", "/");
                 saveFile = new File(saveFilePath);
                 System.out.println("saveFilePath: " + saveFilePath);
 
                 if (!saveFile.exists()) {
                     saveFile.createNewFile();
                     System.out.println("Creating new file");
-                } else {
+
+                } else { //file already exists
+
                     if (saveFile.isDirectory()) {
                         // backup this directory to take over the file name
                         String backupPath = getBackupFilepath(saveFilePath);
@@ -608,6 +748,8 @@ public class MainActivity extends Activity
      *
      * @param view the View that triggers this method.
      */
+
+    /*
     public void copyTextToClipboard(View view) {
         System.out.println("copying to clipboard");
 
@@ -628,11 +770,16 @@ public class MainActivity extends Activity
 
     }
 
+     */
+
+
     /** Clear text showing in the UI. */
+    /*
     public void clearText(View view) {
         saveWritingHistory(textRenderer.getText().toString(), SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME);
         textRenderer.setText("");
     }
+    */
 
     /**
      * This the callback method that will be called by the drawing canvas because if we attach event
@@ -661,6 +808,7 @@ public class MainActivity extends Activity
         startActivity(intent);
     }
 
+    /*
     public void clearCustomLabelText(View view) {
         customLabelEditText.setText("");
     }
@@ -675,6 +823,9 @@ public class MainActivity extends Activity
         }
     }
 
+     */
+
+    /*
     public void saveWritingDataWithCustomLabel(View view) { // exports writing history but with the text in second typing bar when you click icon
         String customLabel = customLabelEditText.getText().toString(); //text in the second typing bar
         System.out.println("custom label edit text: " + customLabel);
@@ -744,6 +895,8 @@ public class MainActivity extends Activity
         }
     }
 
+    */
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_key_auto_evaluate_input))) {
@@ -784,6 +937,7 @@ public class MainActivity extends Activity
             }
         }
     }
+
 
     ArrayList<CourseModel> processHashmap(HashMap<String, String> resultsHM) {
         //add keys to an array list
@@ -859,12 +1013,15 @@ public class MainActivity extends Activity
 
             String meaning = "";
             String gradeString = "";
+            String radicalString = "";
 
             try {
                 JA = new JSONArray(data);
                 for(int i = 0; i < JA.length(); i++) {
                     meaning = JA.getJSONObject(i).optString("meaning");
                     gradeString = JA.getJSONObject(i).optString("grade");
+                    radicalString = JA.getJSONObject(i).optString("rad_utf");
+                    radicals.put(JA.getJSONObject(i).optString("ka_utf"), radicalString);
 
                     if(!gradeString.equals("null")) {
                         dict.put(JA.getJSONObject(i).optString("ka_utf"), meaning);
@@ -886,11 +1043,10 @@ public class MainActivity extends Activity
             System.out.println("-----------Grades Hash Map: " + grades.size());
             int count = 0;
             for (String key: grades.keySet()) {
-                System.out.println(count + ") " + key + " : " + grades.get(key));
+                //System.out.println(count + ") " + key + " : " + grades.get(key));
                 count++;
             }
             System.out.println("--------------------------");
-
 
 
             System.out.println("response code: " + responseCode);
@@ -926,15 +1082,8 @@ public class MainActivity extends Activity
         }
 
         intent.putExtra("kanjiToDraw", kanjiChar);
-        intent.putExtra("inventory", inventory);
 
         startActivityForResult(intent, 2); //activity is started with request code 2
-
-        //startActivity(intent);
-        System.out.println("inventory from main after test activity");
-        inventory.printInventory(); //still empty...
-
-
     }
 
     @Override
@@ -944,19 +1093,14 @@ public class MainActivity extends Activity
         // check if the request code is same as what is passed  here it is 2
         if(requestCode==2)
         {
-            this.inventory = data.getParcelableExtra("inventory");
             this.charDrawn = data.getStringExtra("charDrawn");
-            System.out.println("inventory from main");
-            inventory.printInventory();
             System.out.println("Char drawn (from main): " + charDrawn);
 
             if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && (charDrawn!=null) && (!charDrawn.equals("null"))) { //null when coming from testActivity
-                saveWritingHistory(charDrawn + " 0 " + LocalDate.now(), SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE);
+                appendFile(charDrawn + " 0 " + LocalDate.now(), SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE, "learnt_characters_file.txt");
             } else {
-                System.out.println("char drawn is null");
+                System.out.println("char drawn is null"); //I think happens when char is tested
             }
-
-
         }
     }
 
@@ -964,10 +1108,6 @@ public class MainActivity extends Activity
         //
         System.out.println("Go To Play");
         Intent intent = new Intent(this, PlayActivity.class);
-        intent.putExtra("inventory", inventory);
-
-        System.out.println("Inventory Main -> Play");
-        inventory.printInventory(); //this is an empty inventory.... will try writing to and reading from a file instead
         startActivity(intent);
     }
 
@@ -993,7 +1133,6 @@ public class MainActivity extends Activity
         Intent intent = new Intent(this, GridViewTutorial.class);
         intent.putExtra("hashMap", dict);
         intent.putExtra("gradesHashMap", grades);
-        intent.putExtra("inventory", inventory);
         startActivityForResult(intent, 2);
     }
 

@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ import io.github.ichisadashioko.android.kanji.tflite.Recognition;
 import io.github.ichisadashioko.android.kanji.views.BitmapView;
 import io.github.ichisadashioko.android.kanji.views.CanvasPoint2D;
 import io.github.ichisadashioko.android.kanji.views.HandwritingCanvas;
-import io.github.ichisadashioko.android.kanji.views.Inventory;
+//import io.github.ichisadashioko.android.kanji.views.Inventory;
 import io.github.ichisadashioko.android.kanji.views.ResultButton;
 import io.github.ichisadashioko.android.kanji.views.TouchCallback;
 
@@ -72,7 +73,7 @@ public class DrawCharActivity extends Activity
     public DictionaryExample dictExample;
 
     public HashMap<String, String> dict;
-    public Inventory inventory;
+    //public Inventory inventory;
     public String characterToDraw;
     public String charToSave = "";
     public String LABEL_FILE_PATH = "etlcb_9b_labels.txt"; //temporary, used to filter out kanji that don't match api call
@@ -87,7 +88,7 @@ public class DrawCharActivity extends Activity
 
         Intent intent = getIntent();
         dict = (HashMap<String, String>) intent.getSerializableExtra("hashMap");
-        inventory = getIntent().getParcelableExtra("inventory");
+        //inventory = getIntent().getParcelableExtra("inventory");
         characterToDraw = intent.getStringExtra("kanjiToDraw");
         System.out.println("extra data: ");
         System.out.println("-----------Hash Map from Draw Char: ");
@@ -229,10 +230,11 @@ public class DrawCharActivity extends Activity
         if(results.get(0).title.equals(characterToDraw)) { //aa i don't know if all the kanji from API are in the database from wrapper app
             count++; //increase count of number of evaluations so can count until 20 character draws
             System.out.println("Correct!!!!");
-            inventory.addDango();
-            inventory.printInventory();
+            //inventory.addDango();
+            updateInventory("Dango", 1);
+            //inventory.printInventory();
             charInfo = findViewById(R.id.countButton);
-            charInfo.setText("Correct!"); //reset count button to show increased number
+            charInfo.setText("Correct! Earned x1 Dango"); //reset count button to show increased number
 
             TextView kanjiButton = findViewById(R.id.charToDraw);
             kanjiButton.setText("Draw the character for: '" + dict.get(characterToDraw) + "' " + characterToDraw + " (" + (6 - count) + ") times");
@@ -244,8 +246,9 @@ public class DrawCharActivity extends Activity
             count = 0;
             charToSave = characterToDraw; //character is learnt, will be saved in file
             charInfo = findViewById(R.id.countButton);
-            charInfo.setText("Character " + characterToDraw +" meaning '" + dict.get(characterToDraw) + "' learnt!"); //reset count button to show increased number
-            inventory.addMochi();
+            charInfo.setText("Character " + characterToDraw +" meaning '" + dict.get(characterToDraw) + "' learnt! Earned x1 Mochi"); //reset count button to show increased number
+            //inventory.addMochi();
+            updateInventory("Mochi", 1);
             //ADD TO CHARS TO TEST!!!
 
             //finish activity
@@ -253,7 +256,7 @@ public class DrawCharActivity extends Activity
             handler.postDelayed(new Runnable() {
                 public void run() {
                     Intent intent = new Intent();
-                    intent.putExtra("inventory", inventory);
+                    //intent.putExtra("inventory", inventory);
                     intent.putExtra("charDrawn", characterToDraw);
                     setResult(2, intent);
                     finish();//finishing activity
@@ -265,7 +268,8 @@ public class DrawCharActivity extends Activity
         System.out.println("draw char, Kanji is probably: " + results.get(0).title);
         //here is where you should export/save the kanji to the file
         //pushText(results.get(0).title);
-        saveWritingHistory(results.get(0).title + " label: evaluated <- drawChar");
+
+        //saveWritingHistory(results.get(0).title + " label: evaluated <- drawChar");
 
         clearCanvas(view); //will keep this afterwards, it's useful to see results for now
 
@@ -291,6 +295,36 @@ public class DrawCharActivity extends Activity
         return btn;
     }
 
+    public void updateInventory(String treat, int increment) { //treat may be a treat or happiness
+        try {
+            BufferedReader file = new BufferedReader(new FileReader("/storage/emulated/0/Download/handwriting_data/inventory_file.txt"));
+            String line;
+            String input = ""; //string to store file contents
+
+            while ((line = file.readLine()) != null) {
+                input += line + '\n'; //add each line of the file to input string
+            }
+
+            String[] lines = input.split("\n");
+            String lineToReplace = "";
+            for(String element : lines) {
+                if(element.split(" ")[0].equals(treat)) { //locates line with matching parameter
+                    lineToReplace = element;
+                }
+            }
+
+            String replaceWith = "";
+            int noOfTreats = Integer.parseInt(lineToReplace.split(" ")[1]); //locates current number of treats/happiness
+            replaceWith = treat + " " + (noOfTreats + increment);
+            input = input.replace(lineToReplace, replaceWith);
+
+            FileOutputStream File = new FileOutputStream("/storage/emulated/0/Download/handwriting_data/inventory_file.txt");
+            File.write(input.getBytes());
+
+        } catch (Exception e) {
+            System.out.println("Problem reading file.");
+        }
+    }
     public void saveWritingHistory(final String text) { //saves contents of first typing bar in a file. Updates the same file.
         System.out.println("text to save: " + text);
 
@@ -415,11 +449,11 @@ public class DrawCharActivity extends Activity
         System.out.println("Go To Main");
 
         Intent intent = new Intent();
-        intent.putExtra("inventory", inventory);
+        //intent.putExtra("inventory", inventory);
         intent.putExtra("charDrawn", charToSave);
         System.out.println("charDrawn (from DrawChar): " + charToSave);
-        System.out.println("inventory from draw char, being passed to GV");
-        inventory.printInventory();
+        //System.out.println("inventory from draw char, being passed to GV");
+        //inventory.printInventory();
 
         setResult(2, intent);
         finish();//finishing activity

@@ -29,7 +29,7 @@ public class InferenceThread extends Thread {
                     new Runnable() {
                         @Override
                         public void run() {
-                            app.runClassifier(null);
+                            //app.runClassifier(null); //i just commented this out i don't know what it does
                         }
                     });
         } catch (InterruptedException e) {
