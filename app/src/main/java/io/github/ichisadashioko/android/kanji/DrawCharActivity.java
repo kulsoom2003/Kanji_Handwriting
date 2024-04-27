@@ -88,7 +88,6 @@ public class DrawCharActivity extends Activity
 
         Intent intent = getIntent();
         dict = (HashMap<String, String>) intent.getSerializableExtra("hashMap");
-        //inventory = getIntent().getParcelableExtra("inventory");
         characterToDraw = intent.getStringExtra("kanjiToDraw");
         System.out.println("extra data: ");
         System.out.println("-----------Hash Map from Draw Char: ");
@@ -198,12 +197,10 @@ public class DrawCharActivity extends Activity
             return;
         }
 
-        // long startTime = SystemClock.elapsedRealtime();
         currentEvaluatingWritingStrokes = canvas.writingStrokes;
         currentEvaluatingImage =
                 RenderingUtils.renderImageFromStrokes(currentEvaluatingWritingStrokes);
         this.bitmapView.setBitmap(currentEvaluatingImage);
-        // System.out.println("Number of strokes: " + currentEvaluatingWritingStrokes.size());
         List<Recognition> results = tflite.recognizeImage(currentEvaluatingImage);
         // long evaluateDuration = SystemClock.elapsedRealtime() - startTime;
         // System.out.println(String.format("Inference took %d ms.", evaluateDuration));
@@ -227,14 +224,11 @@ public class DrawCharActivity extends Activity
         System.out.println(results.get(0));
         System.out.println(characterToDraw);
 
-        if(results.get(0).title.equals(characterToDraw)) { //aa i don't know if all the kanji from API are in the database from wrapper app
-            count++; //increase count of number of evaluations so can count until 20 character draws
-            System.out.println("Correct!!!!");
-            //inventory.addDango();
+        if(results.get(0).title.equals(characterToDraw)) {
+            count++;
             updateInventory("Dango", 1);
-            //inventory.printInventory();
             charInfo = findViewById(R.id.countButton);
-            charInfo.setText("Correct! Earned x1 Dango"); //reset count button to show increased number
+            charInfo.setText("Correct! Earned x1 Dango");
 
             TextView kanjiButton = findViewById(R.id.charToDraw);
             kanjiButton.setText("Draw the character for: '" + dict.get(characterToDraw) + "' " + characterToDraw + " (" + (6 - count) + ") times");
@@ -256,7 +250,6 @@ public class DrawCharActivity extends Activity
             handler.postDelayed(new Runnable() {
                 public void run() {
                     Intent intent = new Intent();
-                    //intent.putExtra("inventory", inventory);
                     intent.putExtra("charDrawn", characterToDraw);
                     setResult(2, intent);
                     finish();//finishing activity
@@ -445,19 +438,10 @@ public class DrawCharActivity extends Activity
     }
 
     public void goToMainPage(View view) {
-        //
-        System.out.println("Go To Main");
-
         Intent intent = new Intent();
-        //intent.putExtra("inventory", inventory);
         intent.putExtra("charDrawn", charToSave);
-        System.out.println("charDrawn (from DrawChar): " + charToSave);
-        //System.out.println("inventory from draw char, being passed to GV");
-        //inventory.printInventory();
-
         setResult(2, intent);
-        finish();//finishing activity
-
+        finish(); //finishing activity
     }
 
 }

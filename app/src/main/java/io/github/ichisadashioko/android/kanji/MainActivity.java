@@ -157,30 +157,15 @@ public class MainActivity extends Activity
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        System.out.println("Creating Main Activity");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /*
-        canvas = findViewById(R.id.canvas);
-        resultContainer = findViewById(R.id.result_container);
-        resultViewWidth = (int) getResources().getDimension(R.dimen.result_size);
-        textRenderer = findViewById(R.id.text_renderer);
-        customLabelEditText = findViewById(R.id.custom_label);
-        resultListScrollView = findViewById(R.id.result_container_scroll_view);
-        bitmapView = findViewById(R.id.preview_bitmap);
-
-         */
-
         dict = new HashMap<String, String>();
         grades = new HashMap<String, Integer>();
-        radicals = new HashMap<String, String>();
         createEmptyInventory(SAVE_DIRECTORY_NAME, INVENTORY_FILE);
 
         try {
             new APICallsFromClass().execute().get(); //fill the dictionary
-            System.out.println("dict size: " + dict.size());
-            System.out.println("grades size: " + grades.size());
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
@@ -254,33 +239,19 @@ public class MainActivity extends Activity
         }
 
 
-
+        /*
         updateInventory("Dango", 10);
         updateInventory("Mochi", 5);
         updateInventory("Taiyaki", 3);
-        updateInventory("Happiness", 18);
+        updateInventory("Happiness", 2);
 
 
-
-        /*
         appendFile("夕 17 2024-02-10", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE, LEARNT_CHARS_FILE);
         appendFile("士 15 2024-02-27", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE, LEARNT_CHARS_FILE);
         appendFile("天 8 2024-03-02", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE, LEARNT_CHARS_FILE);
         appendFile("入 16 2024-01-01", SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE, LEARNT_CHARS_FILE);
         System.out.println("saved in new file");
         */
-
-
-
-
-
-
-
-
-
-
-
-
 
     }
 
@@ -587,20 +558,15 @@ public class MainActivity extends Activity
 
                 if (!saveFile.exists()) {
                     saveFile.createNewFile();
-                    System.out.println("No inventory, creating one");
                 } else {
-                    System.out.println("Inventory already exists");
-                    return;
+                    return; //does not recreate existing inventory
                 }
 
             } while (saveFile.length() > MAX_LOG_SIZE);
 
             OutputStreamWriter osw =
-                    new OutputStreamWriter(new FileOutputStream(saveFile, true), "utf8"); //writes to file
-            System.out.println("written to file");
-            osw.append("Dango 0\nMochi 0\nTaiyaki 0\nHappiness 0\n");
-            //osw.append('\n');
-            //new FileOutputStream(saveFile).close();
+                    new OutputStreamWriter(new FileOutputStream(saveFile, true), "utf8");
+            osw.append("Dango 0\nMochi 0\nTaiyaki 0\nHappiness 0\n"); //treats set to zero
             osw.flush();
             osw.close();
             isTextSaved = true;
@@ -967,19 +933,29 @@ public class MainActivity extends Activity
 
     private class APICallsFromClass extends AsyncTask<Void,Void,Void> {
         String data = "";
-        int responseCode;
+        int responseCode = -9;
         JSONArray JA;
+        URL url;
+        HttpURLConnection httpURLConnection;
+
 
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                URL url = new URL("https://kanjialive-api.p.rapidapi.com/api/public/kanji/all");
-                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+                responseCode = -42;
+                url = new URL("https://kanjialive-api.p.rapidapi.com/api/public/kanji/all");
+                httpURLConnection = (HttpURLConnection) url.openConnection();
 
+                responseCode = -50;
                 httpURLConnection.setRequestProperty("X-RapidAPI-Host", "kanjialive-api.p.rapidapi.com");
                 httpURLConnection.setRequestProperty("X-RapidAPI-Key", "2e7c7a14ebmsh3ea82089fdad054p1bf7b7jsn660987efe1ee");
 
-                responseCode = httpURLConnection.getResponseCode();
+                responseCode = -51;
+
+                //responseCode = httpURLConnection.getResponseCode();
+                //System.out.println("response code (from async): " + responseCode);
+
+                responseCode = -52;
 
                 InputStream inputStream = httpURLConnection.getInputStream();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -998,6 +974,7 @@ public class MainActivity extends Activity
 
                  */
 
+                responseCode = -55;
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -1013,15 +990,12 @@ public class MainActivity extends Activity
 
             String meaning = "";
             String gradeString = "";
-            String radicalString = "";
 
             try {
                 JA = new JSONArray(data);
                 for(int i = 0; i < JA.length(); i++) {
                     meaning = JA.getJSONObject(i).optString("meaning");
                     gradeString = JA.getJSONObject(i).optString("grade");
-                    radicalString = JA.getJSONObject(i).optString("rad_utf");
-                    radicals.put(JA.getJSONObject(i).optString("ka_utf"), radicalString);
 
                     if(!gradeString.equals("null")) {
                         dict.put(JA.getJSONObject(i).optString("ka_utf"), meaning);
@@ -1090,16 +1064,14 @@ public class MainActivity extends Activity
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        // check if the request code is same as what is passed  here it is 2
+
         if(requestCode==2)
         {
             this.charDrawn = data.getStringExtra("charDrawn");
-            System.out.println("Char drawn (from main): " + charDrawn);
-
             if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && (charDrawn!=null) && (!charDrawn.equals("null"))) { //null when coming from testActivity
                 appendFile(charDrawn + " 0 " + LocalDate.now(), SAVE_DIRECTORY_NAME, WRITING_LOG_DIR_NAME_NEW_FILE, "learnt_characters_file.txt");
             } else {
-                System.out.println("char drawn is null"); //I think happens when char is tested
+                System.out.println("char drawn is null");
             }
         }
     }
@@ -1119,17 +1091,7 @@ public class MainActivity extends Activity
     }
 
     public void goToGridView(View view) {
-        //
-        System.out.println("Go To Grid View");
-        //System.out.println("-----------Hash Map in goToGridView: ");
-        //int count = 0;
-        //for (String key: dict.keySet()) {
-        //    System.out.println(count + ") " + key + " : " + dict.get(key));
-        //    count++;
-        //}
-        //System.out.println("--------------------------");
         processHashmap(dict);
-
         Intent intent = new Intent(this, GridViewTutorial.class);
         intent.putExtra("hashMap", dict);
         intent.putExtra("gradesHashMap", grades);

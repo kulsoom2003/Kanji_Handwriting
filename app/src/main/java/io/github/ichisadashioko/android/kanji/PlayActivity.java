@@ -124,7 +124,6 @@ public class PlayActivity extends AppCompatActivity {
                     lineToReturn = element;
                 }
             }
-
             int noOfTreats = Integer.parseInt(lineToReturn.split(" ")[1]); //locates current number of treats/happiness
             return noOfTreats;
 

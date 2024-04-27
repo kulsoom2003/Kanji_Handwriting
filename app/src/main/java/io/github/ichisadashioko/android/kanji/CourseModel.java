@@ -1,8 +1,6 @@
 package io.github.ichisadashioko.android.kanji;
 
-public class CourseModel {  //in tutorial this is CourseModel
-    // string course_name for storing course_name
-    // and imgid for storing image id.
+public class CourseModel {
     private String kanjiChar;
     private int imgid;
     private int grade;

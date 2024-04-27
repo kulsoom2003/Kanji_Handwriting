@@ -39,9 +39,6 @@ public class GridViewTutorial extends AppCompatActivity { //activity
         Intent intent = getIntent();
         dict = (HashMap<String, String>) intent.getSerializableExtra("hashMap");
         grades = (HashMap<String, Integer>) intent.getSerializableExtra("gradesHashMap");
-        //inventory = getIntent().getParcelableExtra("inventory");
-        //System.out.println("inventory in GV Tutorial: ");
-        //inventory.printInventory();
         processDict();
 
         System.out.println("extra data: ");

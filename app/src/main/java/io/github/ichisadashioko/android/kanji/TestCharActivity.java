@@ -127,24 +127,15 @@ public class TestCharActivity extends Activity
                 System.out.println(data);
 
                 //check the line is in the right format: symbol exists with length 1
-                if(data.split(" ").length != 3 || data.split(" ")[0].length() != 1) { //checks 3 blocks and symbol is one char
-                    System.out.println("Chars Learnt line incorrect format");
-                    //stop somehow
-                    return; //if this happens then the app doesn't crash, it just shows default info. but then buttons make it crash
+                if(data.split(" ").length != 3 || data.split(" ")[0].length() != 1) {
+                    return;
                 } else {
                     System.out.println("line: " + data.split(" ")[0] + ":" + data.split(" ")[1] + ":" + data.split(" ")[2]);
                 }
 
-                // add to charsLearnt HashMap
-                //String charLearntKey = data.substring(0,1); //split this on " " instead
                 String charLearntKey = data.split(" ")[0];
-                //String charLearntNoTestedAndDate = data.substring(2); //start from 2nd index (after char and space)
                 String charLearntNoTestedAndDate = data.split(" ")[1] + " " + data.split(" ")[2]; //start from 2nd index (after char and space)
-
-                //System.out.println(charLearntKey + ", " + charLearntNoTestedAndDate);
-                //charsLearnt.put(charLearntKey, charLearntNoTestedAndDate);
                 charsLearnt.put(charLearntKey, charLearntNoTestedAndDate);
-
             }
             myReader.close();
             System.out.println("Done reading file");
@@ -168,18 +159,12 @@ public class TestCharActivity extends Activity
 
         System.out.println("Chars Learnt Information");
         for (String key : charsLearnt.keySet()) {
-            //System.out.println(key + ", " + charsLearnt.get(key));
             noOfTimesTested = Integer.parseInt(charsLearnt.get(key).split(" ")[0]);
-            //check the line is in the right format: noOfTimesTested is a non-negative number
-
             daysUntilNextTest = noOfTimesTested;
             reps = 20 - noOfTimesTested;
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 dateTemp = LocalDate.parse(charsLearnt.get(key).split(" ")[1]);
-                //check the line is in the right format: check this date is valid?
-
-
                 dueDate = dateTemp.plusDays(daysUntilNextTest);
 
                 //print info
@@ -455,11 +440,8 @@ public class TestCharActivity extends Activity
             kanjiButton.setText("Draw the character for '" + meaning + "' " + (charsToTestEntry.getValue() - count) + " times");
         }
 
-        if(count == charsToTestEntry.getValue()) { //done reps
-
-            //update file here with new due date & reps.
+        if(count == charsToTestEntry.getValue()) { //indicates finished repetitions
             updateFileTestedChar(characterToDraw);
-            //display correct
             updateInventory("Taiyaki", 1);
             charInfo.setText("Well done! Earned x1 Taiyaki");
             //display that treats were added to the inventory
