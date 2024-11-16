@@ -1,8 +1,6 @@
 # Kanji Handwriting Input on Android with TensorFlow Lite
 
-![Imgur](https://i.imgur.com/DHxXd0F.png)
-
-[Demo video](https://youtu.be/NzCLFQ-zo3k)
+- Originally cloned from [ichisadashioko's repository](https://github.com/ichisadashioko/kanji-recognition-android). 
 
 ## Requirements
 
